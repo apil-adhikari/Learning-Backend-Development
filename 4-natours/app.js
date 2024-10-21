@@ -1,0 +1,343 @@
+// =======================Tutorial===================================
+
+// Core Module
+const fs = require('fs');
+// Requiring the express package
+const express = require('express');
+
+// Creating an instance of the express function by initilizing express to app variable
+const app = express();
+
+// MIDDLEWARE
+// Middleware for reading request body data
+app.use(express.json()); // Helps to parse the request data
+
+// ROUTING Syntax: app.method('path or endpoint', handlerFunction)
+
+// ROUTE: get();
+// app.get('/', (req, res) => {
+//   // Send data back
+//   res
+//     .status(200)
+//     // when using .json() to response to the request, it sets the Content-Type to application/json by default. We don't have to manually specify the content type. Which makes our life a little bit easier.
+//     // .send() method only sends string back to the client. We can also send json data back to the client.
+//     .json({
+//       message: 'Hello from the server side.',
+//       application: 'Natours',
+//     });
+//   // .send('Hello from the server side.');
+// });
+
+// app.post('/', (req, res) => {
+//   res.send(
+//     'We can post to this endpoint, we need the matching url and the matching HTTP method to that url endpoint'
+//   );
+// });
+
+// -------Starting API Handling GET Requests
+/**
+ * 1) It is important to give version number to our api as later we can update it without deploying it in the real world eg: '/api/v1/tours' -> ADD SOME FEATTURES => UPDATE IN 'api/v2/tours'-> later rollout to the live enviornment.
+ * 2) Reading the data, we use fs core module. Since the data that we read is in json format, we need to parse it so that json data is conveted in to JS object.
+ *
+ *
+ *
+ */
+
+// Read the data of all tours at once (in top level code)
+
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+// console.log(typeof tours);
+// console.log(tours)
+
+// GET Request: used to request data from the specific resource
+// get() -> tours: send all of the availiable tours as response when request is made.
+app.get('/api/v1/tours', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    // Sending no of results we have since its an array we can count the length of that array.
+    results: `${tours.length} results found`,
+    // Envolope for our data
+    data: {
+      // url's endpoint: send the data that we need to send as response
+      tours: tours,
+    },
+  });
+});
+
+// Post Rquest: POST method is used to send data to a server to create(add)/update a resource.
+app.post('/api/v1/tours', (req, res) => {
+  // post request is used to send data from the client to the server. So the data sent is availiable in the request objet of the requestHandler function.
+  // Express does not put the body data of request out of the box. So to have the request data availiable, we need to use middleware ie. app.use(express.json()) middleware in the top level code.
+
+  // console.log(req.body);
+
+  //Figure out the id of the new object to be created(REST API: we never specify the ID of the object)
+  // Total tours -> 9
+  // tours.length -> 9
+  // tours.length -1 -> 8
+  // If there are n array items, then last array item is always (n-1)
+
+  const newId = tours[tours.length - 1].id + 1;
+
+  // tours[9-1] -> tours[8] -> last element -> .id => 8 -> +1 => 9 = newId
+
+  // Combine the newId and the request body data to form one object
+  const newTour = Object.assign({ id: newId }, req.body);
+  //     const newTour = {id: newId, ...req.body}
+
+  // Push the new tour to the array
+  tours.push(newTour);
+
+  // Finally, save/persist the newly pushed data
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(201).json({
+        status: 'success',
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+});
+
+// NOTE: UPDATING DATA
+// updating data using PATCH/PUT methods.
+// put() method -> expects our application to reveive entire new updated object
+// patch() method -> expects the only the properties that are updated.
+
+app.patch('/api/v1/tours/:id', (req, res) => {
+  console.log('-----------------------------');
+  // Consoling the data in the URL Parameter
+  console.log('Request->params data');
+  console.log(req.params);
+  // Consoling request-> body's data(sent by the client)
+  console.log('Request->body data');
+  console.log(req.body);
+  console.log('-----------------------------');
+
+  // 1) REVEIVE THE INCOMING DATA:  Get the updated data from the client that is in req.body
+  const updatedTourData = req.body;
+  console.log('Updated Tour Data from req.body:');
+  console.log(updatedTourData);
+
+  // 2) FIND THE EXISTING TOUR:
+  // 2.1) Getting the tour ID from the request params using unique parameter id
+  const tourId = parseInt(req.params.id);
+  console.log(`ID to be updated: ${tourId}`);
+
+  // 2.2) Find the matching tour to update
+  const tour = tours.find((tour) => tour.id === tourId);
+  if (!tour) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID, no tour found to update',
+    });
+  }
+
+  console.log('Tour data before UPDATE:::');
+  console.log(tour);
+
+  // Update the fields that are present in the req.body
+  for (let key in updatedTourData) {
+    if (tour.hasOwnProperty(key)) {
+      tour[key] = updatedTourData[key]; // Updating only the filed requested to update.
+    }
+  }
+
+  console.log('Tour data AFTER UPDATE:::');
+  console.log(tour);
+  // Push the new tour to the array
+  // tours.push(tour);
+
+  // save the updated data.
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(200).json({
+        status: 'success',
+        data: {
+          tour: tour,
+        },
+      });
+    }
+  );
+});
+
+// NOTE: Handling DELETE Request
+app.delete('/api/v1/tours/:id', (req, res) => {
+  // Identify item to be deleted
+  // Get the id of the item
+  const id = parseInt(req.params.id);
+  // find the item in the API(file based api)
+  // const tour = tours.find((tour) => tour.id === id);
+
+  // // Check if tour requested to be deleted exsixts
+  // if (!tour) {
+  //   return res.status(404).json({
+  //     status: 'fail',
+  //     message: 'Invalid ID. No tour found with the requested id.',
+  //   });
+  // }
+
+  //Remove the item using .filter() . The filter() method creates a new array filled with elements that pass a test provided by a function. The filter() method does not execute the function for empty elements. The filter() method does not change the original array
+
+  // Use array.filter() method to delete data if the array size is smaller else use findIndex() and then .splice() to delte the data for large array or datasets.
+  // const updatedTours = tours.filter((tour) => !tour.id === id);
+  // console.log(updatedTours);
+
+  // find indes of the tour to be deleted
+  const indexOfTourToDelete = tours.findIndex((tour) => tour.id === id);
+  tours.splice(indexOfTourToDelete, 1);
+
+  console.log(tours);
+
+  // Save the file after deletion of data
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(204).json({
+        status: 'success',
+        data: null,
+      });
+    }
+  );
+});
+
+// Responding to URL Parameter: To get one single result
+app.get('/api/v1/tours/:id', (req, res) => {
+  // request.params is where all the variables in URL parameter are store.
+  console.log(req.params);
+
+  const id = req.params.id * 1;
+  const tour = tours.find((el) => el.id === id);
+
+  // Finding if the requested ID exists.
+  // if (id > tours.length) { // If the ID doesnot exsist, then there is no tour.
+  if (!tour) {
+    // If there is no tour(undefined) its invalid
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+
+  console.log(tour);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour: tour,
+    },
+  });
+});
+
+// We first should start a server
+const port = 3000;
+
+app.listen(port, () => {
+  console.log(`Our App is running in the port ${port}.`);
+});
+
+// ================================================================
+// ===========================REVISON===========================
+// // Requiring Core Modules
+// const fs = require('fs');
+// // Requiring 3rd Party Modules installed from NPM
+// const express = require('express');
+
+// // Create an instance variable by initilizing express() to it.
+// const app = express();
+
+// // Parse the request -> body data using middleware
+// app.use(express.json());
+
+// // Read the data (file base API for now). Since the data we are reading is JSON file, we need to first parse it to convert into javascript object
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+// );
+
+// //ROUTING
+// // Handling the GET request: Get is used to request data from a specific resource
+// // Always use version while specifying the route, it make life easier when updating the resources in the future
+// app.get('/api/v1/tours', (req, res) => {
+//   // Send the response back to the client using JSend Specification:
+//   res.status(200).json({
+//     status: 'success',
+//     // Displaying number of tours(we have an array with multiple objects inside)
+//     results: `${tours.length} results found`,
+//     data: {
+//       // endpoint: data to send as response
+//       tours: tours,
+//     },
+//   });
+// });
+
+// // Creating a new data using POST method
+// app.post('/api/v1/tours', (req, res) => {
+//   console.log(req.body); // this is in object form
+
+//   // Calculate id for new data
+//   const newId = tours[tours.length - 1].id + 1;
+//   console.log(newId);
+
+//   const newTour = Object.assign({ id: newId }, req.body);
+
+//   console.log(newTour);
+
+//   // Push the newly created data into the API
+//   tours.push(newTour);
+
+//   // Save the result in the database(file based API)
+//   fs.writeFile(
+//     `${__dirname}/dev-data/data/tours-simple.json`,
+//     JSON.stringify(tours),
+//     (err) => {
+//       // send the response
+//       res.status(201).json({
+//         status: 'success',
+//         data: {
+//           tour: newTour,
+//         },
+//       });
+//     }
+//   );
+// });
+
+// // Get single result by responding to the URL parameter eg: 127.0.0.1:3000/api/v1/tours/5
+// app.get('/api/v1/tours/:id', (req, res) => {
+//   // The prarams value is availiable at request.params
+//   console.log(req.params);
+
+//   const idOfTour = req.params.id * 1;
+//   console.log(typeof idOfTour);
+//   const requestedTour = tours.find((el) => el.id === idOfTour);
+
+//   if (!requestedTour) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'Invalid ID, no tour found with that id',
+//     });
+//   }
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour: requestedTour,
+//     },
+//   });
+// });
+
+// // Listen on specific port:
+// const port = 3000;
+// app.listen(port, () => {
+//   console.log(`Server started. Listening on port ${port}`);
+// });
+
+// // -------------------------------------------------------------------------

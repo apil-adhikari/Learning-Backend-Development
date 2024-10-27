@@ -4,14 +4,28 @@
 const fs = require('fs');
 // Requiring the express package
 const express = require('express');
-const { create } = require('domain');
 
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
 
-// MIDDLEWARE
+// MIDDLEWARE .use() method to use middleware
 // Middleware for reading request body data
 app.use(express.json()); // Helps to parse the request data
+
+// Custom Middleware
+
+app.use((req, res, next) => {
+  // This get applied to all the requests as we haven't specified in the routing, which is also known as Global Middleware
+  console.log('Hello from the middleware, CUSTOM MIDDLEWARE 1 👋');
+
+  // Call next() when using middleware
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
 
 // ROUTING Syntax: app.method('path or endpoint', handlerFunction)
 
@@ -52,8 +66,11 @@ const tours = JSON.parse(
 
 // Refactoring ROUTES (By seprating Request Handler Function)
 const getAllTours = (req, res) => {
+  console.log(req.requestTime);
+
   res.status(200).json({
     status: 'success',
+    requestedAt: req.requestTime,
     // Sending no of results we have since its an array we can count the length of that array.
     results: `${tours.length} results found`,
     // Envolope for our data

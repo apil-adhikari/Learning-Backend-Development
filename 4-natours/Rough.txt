@@ -1,10 +1,12 @@
+Code before Refactor
+
 // =======================Tutorial===================================
+
 
 // Core Module
 const fs = require('fs');
 // Requiring the express package
 const express = require('express');
-const { create } = require('domain');
 
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
@@ -49,9 +51,12 @@ app.use(express.json()); // Helps to parse the request data
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
+// console.log(typeof tours);
+// console.log(tours)
 
-// Refactoring ROUTES (By seprating Request Handler Function)
-const getAllTours = (req, res) => {
+// GET Request: used to request data from the specific resource
+// get() -> tours: send all of the availiable tours as response when request is made.
+app.get('/api/v1/tours', (req, res) => {
   res.status(200).json({
     status: 'success',
     // Sending no of results we have since its an array we can count the length of that array.
@@ -62,9 +67,10 @@ const getAllTours = (req, res) => {
       tours: tours,
     },
   });
-};
+});
 
-const createTour = (req, res) => {
+// Post Rquest: POST method is used to send data to a server to create(add)/update a resource.
+app.post('/api/v1/tours', (req, res) => {
   // post request is used to send data from the client to the server. So the data sent is availiable in the request objet of the requestHandler function.
   // Express does not put the body data of request out of the box. So to have the request data availiable, we need to use middleware ie. app.use(express.json()) middleware in the top level code.
 
@@ -100,9 +106,14 @@ const createTour = (req, res) => {
       });
     }
   );
-};
+});
 
-const updateTour = (req, res) => {
+// NOTE: UPDATING DATA
+// updating data using PATCH/PUT methods.
+// put() method -> expects our application to reveive entire new updated object
+// patch() method -> expects the only the properties that are updated.
+
+app.patch('/api/v1/tours/:id', (req, res) => {
   console.log('-----------------------------');
   // Consoling the data in the URL Parameter
   console.log('Request->params data');
@@ -159,9 +170,10 @@ const updateTour = (req, res) => {
       });
     }
   );
-};
+});
 
-const deleteTour = (req, res) => {
+// NOTE: Handling DELETE Request
+app.delete('/api/v1/tours/:id', (req, res) => {
   // Identify item to be deleted
   // Get the id of the item
   const id = parseInt(req.params.id);
@@ -199,9 +211,10 @@ const deleteTour = (req, res) => {
       });
     }
   );
-};
+});
 
-const getTour = (req, res) => {
+// Responding to URL Parameter: To get one single result
+app.get('/api/v1/tours/:id', (req, res) => {
   // request.params is where all the variables in URL parameter are store.
   console.log(req.params);
 
@@ -226,27 +239,7 @@ const getTour = (req, res) => {
       tour: tour,
     },
   });
-};
-
-// GET Request: used to request data from the specific resource
-// get() -> tours: send all of the availiable tours as response when request is made.
-app.get('/api/v1/tours', getAllTours);
-
-// Post Rquest: POST method is used to send data to a server to create(add)/update a resource.
-app.post('/api/v1/tours', createTour);
-
-// NOTE: UPDATING DATA
-// updating data using PATCH/PUT methods.
-// put() method -> expects our application to reveive entire new updated object
-// patch() method -> expects the only the properties that are updated.
-
-app.patch('/api/v1/tours/:id', updateTour);
-
-// NOTE: Handling DELETE Request
-app.delete('/api/v1/tours/:id', deleteTour);
-
-// Responding to URL Parameter: To get one single result
-app.get('/api/v1/tours/:id', getTour);
+});
 
 // We first should start a server
 const port = 3000;
@@ -254,3 +247,100 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Our App is running in the port ${port}.`);
 });
+
+// ================================================================
+// ===========================REVISON===========================
+// // Requiring Core Modules
+// const fs = require('fs');
+// // Requiring 3rd Party Modules installed from NPM
+// const express = require('express');
+
+// // Create an instance variable by initilizing express() to it.
+// const app = express();
+
+// // Parse the request -> body data using middleware
+// app.use(express.json());
+
+// // Read the data (file base API for now). Since the data we are reading is JSON file, we need to first parse it to convert into javascript object
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+// );
+
+// //ROUTING
+// // Handling the GET request: Get is used to request data from a specific resource
+// // Always use version while specifying the route, it make life easier when updating the resources in the future
+// app.get('/api/v1/tours', (req, res) => {
+//   // Send the response back to the client using JSend Specification:
+//   res.status(200).json({
+//     status: 'success',
+//     // Displaying number of tours(we have an array with multiple objects inside)
+//     results: `${tours.length} results found`,
+//     data: {
+//       // endpoint: data to send as response
+//       tours: tours,
+//     },
+//   });
+// });
+
+// // Creating a new data using POST method
+// app.post('/api/v1/tours', (req, res) => {
+//   console.log(req.body); // this is in object form
+
+//   // Calculate id for new data
+//   const newId = tours[tours.length - 1].id + 1;
+//   console.log(newId);
+
+//   const newTour = Object.assign({ id: newId }, req.body);
+
+//   console.log(newTour);
+
+//   // Push the newly created data into the API
+//   tours.push(newTour);
+
+//   // Save the result in the database(file based API)
+//   fs.writeFile(
+//     `${__dirname}/dev-data/data/tours-simple.json`,
+//     JSON.stringify(tours),
+//     (err) => {
+//       // send the response
+//       res.status(201).json({
+//         status: 'success',
+//         data: {
+//           tour: newTour,
+//         },
+//       });
+//     }
+//   );
+// });
+
+// // Get single result by responding to the URL parameter eg: 127.0.0.1:3000/api/v1/tours/5
+// app.get('/api/v1/tours/:id', (req, res) => {
+//   // The prarams value is availiable at request.params
+//   console.log(req.params);
+
+//   const idOfTour = req.params.id * 1;
+//   console.log(typeof idOfTour);
+//   const requestedTour = tours.find((el) => el.id === idOfTour);
+
+//   if (!requestedTour) {
+//     return res.status(404).json({
+//       status: 'fail',
+//       message: 'Invalid ID, no tour found with that id',
+//     });
+//   }
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour: requestedTour,
+//     },
+//   });
+// });
+
+// // Listen on specific port:
+// const port = 3000;
+// app.listen(port, () => {
+//   console.log(`Server started. Listening on port ${port}`);
+// });
+
+// // -------------------------------------------------------------------------

@@ -5,8 +5,13 @@ const fs = require('fs');
 // Requiring the express package
 const express = require('express');
 
+const morgan = require('morgan');
+
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
+
+// MIDDLEWARES
+app.use(morgan('dev'));
 
 // MIDDLEWARE .use() method to use middleware
 // Middleware for reading request body data
@@ -64,6 +69,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
+// ROUTE HANDLERS
 // Refactoring ROUTES (By seprating Request Handler Function)
 const getAllTours = (req, res) => {
   console.log(req.requestTime);
@@ -252,6 +258,7 @@ const getTour = (req, res) => {
 // app.delete('/api/v1/tours/:id', deleteTour);
 // app.get('/api/v1/tours/:id', getTour);
 
+// ROUTES
 // Updated Routing: Chaining the Routes using app.route()
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
 app

@@ -9,6 +9,7 @@
   "author": "Apil Adhikari",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "morgan": "^1.10.0"
   }
 }

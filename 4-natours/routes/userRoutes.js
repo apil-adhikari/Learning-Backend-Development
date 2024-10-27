@@ -1,0 +1,23 @@
+const express = require('express');
+const userController = require('../controllers/userController');
+
+/** STEP TO CREATE ROUTER
+ * 1) Create a router using express.Router();
+ * 2) Use router to route and call the handler functions based on route
+ * 3) Chain the Routes using app.route('endpoint').method(requestHandlerFunction)
+ * 4) Export the router and use in the main route
+ */
+const router = express.Router();
+
+// Users Route:
+router
+  .route('/')
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
+router
+  .route('/:id')
+  .get(userController.getUser)
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
+
+module.exports = router;

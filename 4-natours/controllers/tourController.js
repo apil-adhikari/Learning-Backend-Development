@@ -4,6 +4,36 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+// Check ID Param Middleware
+exports.checkID = (req, res, next, value) => {
+  console.log(`Tour id is: ${value}`);
+  const id = req.params.id;
+  const tourId = parseInt(id);
+  const tour = tours.find((tour) => tour.id === tourId);
+  if (!tour) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID, no tour found to update',
+    });
+  }
+  next();
+};
+/**Create a checkBody Middleware
+Check if body contains the name and price property
+If not, send back 400 (bad request) Add it to post handler stack
+*/
+exports.checkBody = (req, res, next) => {
+  const name = req.body.name;
+  const price = req.body.price;
+  if (!name || !price) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Invalid request from the client. Missing name or price',
+    });
+  }
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   console.log(req.requestTime);
 
@@ -44,7 +74,7 @@ exports.createTour = (req, res) => {
 
   // Finally, save/persist the newly pushed data
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       res.status(201).json({
@@ -79,12 +109,12 @@ exports.updateTour = (req, res) => {
 
   // 2.2) Find the matching tour to update
   const tour = tours.find((tour) => tour.id === tourId);
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID, no tour found to update',
-    });
-  }
+  // if (!tour) {
+  //   return res.status(404).json({
+  //     status: 'fail',
+  //     message: 'Invalid ID, no tour found to update',
+  //   });
+  // }
 
   console.log('Tour data before UPDATE:::');
   console.log(tour);
@@ -93,6 +123,8 @@ exports.updateTour = (req, res) => {
   for (let key in updatedTourData) {
     if (tour.hasOwnProperty(key)) {
       tour[key] = updatedTourData[key]; // Updating only the filed requested to update.
+    } else {
+      tour[key] = updatedTourData[key];
     }
   }
 
@@ -103,7 +135,7 @@ exports.updateTour = (req, res) => {
 
   // save the updated data.
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       res.status(200).json({
@@ -145,7 +177,7 @@ exports.deleteTour = (req, res) => {
 
   // Save the file after deletion of data
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       res.status(204).json({
@@ -163,15 +195,15 @@ exports.getTour = (req, res) => {
   const id = req.params.id * 1;
   const tour = tours.find((el) => el.id === id);
 
-  // Finding if the requested ID exists.
+  // Finding if the requested ID exists. (Implemented in Param Middleware above checkID)
   // if (id > tours.length) { // If the ID doesnot exsist, then there is no tour.
-  if (!tour) {
-    // If there is no tour(undefined) its invalid
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
+  // if (!tour) {
+  //   // If there is no tour(undefined) its invalid
+  //   return res.status(404).json({
+  //     status: 'fail',
+  //     message: 'Invalid ID',
+  //   });
+  // }
 
   console.log(tour);
 

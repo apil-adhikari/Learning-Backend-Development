@@ -228,25 +228,20 @@ const getTour = (req, res) => {
   });
 };
 
-// GET Request: used to request data from the specific resource
-// get() -> tours: send all of the availiable tours as response when request is made.
-app.get('/api/v1/tours', getAllTours);
+// Routing
+// app.get('/api/v1/tours', getAllTours);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+// app.get('/api/v1/tours/:id', getTour);
 
-// Post Rquest: POST method is used to send data to a server to create(add)/update a resource.
-app.post('/api/v1/tours', createTour);
-
-// NOTE: UPDATING DATA
-// updating data using PATCH/PUT methods.
-// put() method -> expects our application to reveive entire new updated object
-// patch() method -> expects the only the properties that are updated.
-
-app.patch('/api/v1/tours/:id', updateTour);
-
-// NOTE: Handling DELETE Request
-app.delete('/api/v1/tours/:id', deleteTour);
-
-// Responding to URL Parameter: To get one single result
-app.get('/api/v1/tours/:id', getTour);
+// Updated Routing: Chaining the Routes using app.route()
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 // We first should start a server
 const port = 3000;

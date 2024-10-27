@@ -10,6 +10,9 @@ const app = express();
 // MIDDLEWARES
 app.use(morgan('dev'));
 
+// Serving static file using builtin middleware
+app.use(express.static(`${__dirname}/public`));
+
 // MIDDLEWARE .use() method to use middleware
 // Middleware for reading request body data
 app.use(express.json()); // Helps to parse the request data

@@ -18,10 +18,11 @@ exports.checkID = (req, res, next, value) => {
   }
   next();
 };
-/**Create a checkBody Middleware
-Check if body contains the name and price property
-If not, send back 400 (bad request) Add it to post handler stack
-*/
+/**
+ * Create a checkBody Middleware
+ * Check if body contains the name and price property
+ * If not, send back 400 (bad request) Add it to post handler stack
+ */
 exports.checkBody = (req, res, next) => {
   const name = req.body.name;
   const price = req.body.price;

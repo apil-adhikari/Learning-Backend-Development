@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 );
 
 // Check ID Param Middleware
@@ -84,7 +84,7 @@ exports.createTour = (req, res) => {
           tour: newTour,
         },
       });
-    }
+    },
   );
 };
 
@@ -145,7 +145,7 @@ exports.updateTour = (req, res) => {
           tour: tour,
         },
       });
-    }
+    },
   );
 };
 
@@ -185,7 +185,7 @@ exports.deleteTour = (req, res) => {
         status: 'success',
         data: null,
       });
-    }
+    },
   );
 };
 

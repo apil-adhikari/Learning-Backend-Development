@@ -1,23 +1,10 @@
 const fs = require('fs');
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-);
+//NOTE: Reading FILE from file based API
+// const tours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
+// );
 
-// Check ID Param Middleware
-exports.checkID = (req, res, next, value) => {
-  console.log(`Tour id is: ${value}`);
-  const id = req.params.id;
-  const tourId = parseInt(id);
-  const tour = tours.find((tour) => tour.id === tourId);
-  if (!tour) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID, no tour found to update',
-    });
-  }
-  next();
-};
 /**
  * Create a checkBody Middleware
  * Check if body contains the name and price property
@@ -50,6 +37,9 @@ exports.getAllTours = (req, res) => {
     },
   });
 };
+
+// NOTE: Create a NEW TOURSDZC
+
 exports.createTour = (req, res) => {
   // post request is used to send data from the client to the server. So the data sent is availiable in the request objet of the requestHandler function.
   // Express does not put the body data of request out of the box. So to have the request data availiable, we need to use middleware ie. app.use(express.json()) middleware in the top level code.

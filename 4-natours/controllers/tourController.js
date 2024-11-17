@@ -97,44 +97,20 @@ exports.updateTour = async (req, res) => {
   }
 };
 
-exports.deleteTour = (req, res) => {
-  // Identify item to be deleted
-  // Get the id of the item
-  const id = parseInt(req.params.id);
-  // find the item in the API(file based api)
-  // const tour = tours.find((tour) => tour.id === id);
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
 
-  // // Check if tour requested to be deleted exsixts
-  // if (!tour) {
-  //   return res.status(404).json({
-  //     status: 'fail',
-  //     message: 'Invalid ID. No tour found with the requested id.',
-  //   });
-  // }
-
-  //Remove the item using .filter() . The filter() method creates a new array filled with elements that pass a test provided by a function. The filter() method does not execute the function for empty elements. The filter() method does not change the original array
-
-  // Use array.filter() method to delete data if the array size is smaller else use findIndex() and then .splice() to delte the data for large array or datasets.
-  // const updatedTours = tours.filter((tour) => !tour.id === id);
-  // console.log(updatedTours);
-
-  // find indes of the tour to be deleted
-  const indexOfTourToDelete = tours.findIndex((tour) => tour.id === id);
-  tours.splice(indexOfTourToDelete, 1);
-
-  console.log(tours);
-
-  // Save the file after deletion of data
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(204).json({
-        status: 'success',
-        data: null,
-      });
-    },
-  );
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
 exports.getTour = async (req, res) => {

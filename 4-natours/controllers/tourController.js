@@ -76,65 +76,25 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = (req, res) => {
-  console.log('-----------------------------');
-  // Consoling the data in  the URL Parameter
-  console.log('Request->params data');
-  console.log(req.params);
-  // Consoling request-> body's data(sent by the client)
-  console.log('Request->body data');
-  console.log(req.body);
-  console.log('-----------------------------');
+exports.updateTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
-  // 1) REVEIVE THE INCOMING DATA:  Get the updated data from the client that is in req.body
-  const updatedTourData = req.body;
-  console.log('Updated Tour Data from req.body:');
-  console.log(updatedTourData);
-
-  // 2) FIND THE EXISTING TOUR:
-  // 2.1) Getting the tour ID from the request params using unique parameter id
-  const tourId = parseInt(req.params.id);
-  console.log(`ID to be updated: ${tourId}`);
-
-  // 2.2) Find the matching tour to update
-  const tour = tours.find((tour) => tour.id === tourId);
-  // if (!tour) {
-  //   return res.status(404).json({
-  //     status: 'fail',
-  //     message: 'Invalid ID, no tour found to update',
-  //   });
-  // }
-
-  console.log('Tour data before UPDATE:::');
-  console.log(tour);
-
-  // Update the fields that are present in the req.body
-  for (let key in updatedTourData) {
-    if (tour.hasOwnProperty(key)) {
-      tour[key] = updatedTourData[key]; // Updating only the filed requested to update.
-    } else {
-      tour[key] = updatedTourData[key];
-    }
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: tour,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
   }
-
-  console.log('Tour data AFTER UPDATE:::');
-  console.log(tour);
-  // Push the new tour to the array
-  // tours.push(tour);
-
-  // save the updated data.
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(200).json({
-        status: 'success',
-        data: {
-          tour: tour,
-        },
-      });
-    },
-  );
 };
 
 exports.deleteTour = (req, res) => {
@@ -180,7 +140,7 @@ exports.deleteTour = (req, res) => {
 exports.getTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
-    // Tour.findOne({_id: req.params.id})
+    // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
 
     res.status(200).json({
       status: 'success',

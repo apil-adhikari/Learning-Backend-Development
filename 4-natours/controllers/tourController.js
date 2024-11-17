@@ -23,20 +23,26 @@ exports.checkBody = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = (req, res) => {
-  console.log(req.requestTime);
+exports.getAllTours = async (req, res) => {
+  try {
+    const tours = await Tour.find();
 
-  res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    // Sending no of results we have since its an array we can count the length of that array.
-    results: `${tours.length} results found`,
-    // Envolope for our data
-    data: {
-      // url's endpoint: send the data that we need to send as response
-      tours: tours,
-    },
-  });
+    res.status(200).json({
+      status: 'success',
+      // Sending no of results we have since its an array we can count the length of that array.
+      results: `${tours.length} results found`,
+      // Envolope for our data
+      data: {
+        // url's endpoint: send the data that we need to send as response
+        tours: tours,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
 /** METHOD POST: CREATE a new TOUR
@@ -72,7 +78,7 @@ exports.createTour = async (req, res) => {
 
 exports.updateTour = (req, res) => {
   console.log('-----------------------------');
-  // Consoling the data in the URL Parameter
+  // Consoling the data in  the URL Parameter
   console.log('Request->params data');
   console.log(req.params);
   // Consoling request-> body's data(sent by the client)
@@ -171,12 +177,23 @@ exports.deleteTour = (req, res) => {
   );
 };
 
-exports.getTour = (req, res) => {
-  // request.params is where all the variables in URL parameter are store.
-  console.log(req.params);
+exports.getTour = async (req, res) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    // Tour.findOne({_id: req.params.id})
 
-  const id = req.params.id * 1;
-  const tour = tours.find((el) => el.id === id);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: tour,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 
   // Finding if the requested ID exists. (Implemented in Param Middleware above checkID)
   // if (id > tours.length) { // If the ID doesnot exsist, then there is no tour.
@@ -187,13 +204,4 @@ exports.getTour = (req, res) => {
   //     message: 'Invalid ID',
   //   });
   // }
-
-  console.log(tour);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: tour,
-    },
-  });
 };

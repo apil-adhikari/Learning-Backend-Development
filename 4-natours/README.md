@@ -17,6 +17,12 @@ Install following DEV Dependencies:
 
 ## Error: listen EADDRINUSE: address already in use :::<PORT>
 
+Run CMD as an ADMINISTRATO
+
+    taskkill /F /IM node.exe
+
+If this doesnot work then use following:
+
 If there is an error of address already in use when starting the server in Express, we can do like this to resolve the problem in windows machine.
 
 REM Replace <PORT> with your target port number
@@ -30,3 +36,23 @@ REM Replace <PID> with the PID found in the previous command output
 REM Replace <PID> with the same PID to terminate the process
 
     taskkill /PID <PID> /F
+
+## Duplicate Key Error even if <i> schemaType </i> `unique: false`
+
+### [Solution 1: StackOverFlow](https://stackoverflow.com/questions/24430220/e11000-duplicate-key-error-index-in-mongodb-mongoose)
+
+This solution still works in 2023 and you don't need to drop your collection or lose any data.
+Here's how I solved same issue in September 2020. There is a super-fast and easy way from the mongodb atlas (cloud and desktop). Probably it was not that easy before? That is why I feel like I should write this answer in 2020.
+
+First of all, I read above some suggestions of changing the field "unique" on the mongoose schema. If you came up with this error I assume you already changed your schema, but despite of that you got a 500 as your response, and notice this: specifying duplicated KEY!. If the problem was caused by schema configuration and assuming you have configurated a decent middleware to log mongo errors the response would be a 400.
+
+Why this happens (at least the main reason)
+Why is that? In my case was simple, that field on the schema it used to accept only unique values but I just changed it to accept repeated values. Mongodb creates indexes for fields with unique values in order to retrieve the data faster, so on the past mongo created that index for that field, and so even after setting "unique" property as "false" on schema, mongodb was still using that index, and treating it as it had to be unique.
+
+How to solve it
+Dropping that index. You can do it in 2 seconds from Mongo Atlas or executing it as a command on mongo shell. For the sack of simplicity I will show the first one for users that are not using mongo shell.
+
+Go to your collection. By default you are on "Find" tab. Just select the next one on the right: "Indexes". You will see how there is still an index given to the same field is causing you trouble. Just click the button "Drop Index". Done.
+
+So don't drop your database everytime this happens
+I believe this is a better option than just dropping your entire database or even collection. Basically because this is why it works after dropping the entire collection. Because mongo is not going to set an index for that field if your first entry is using your new schema with "unique: false".

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const Tour = require('../models/tourModel');
 
 //NOTE: Reading FILE from file based API
 // const tours = JSON.parse(
@@ -38,44 +39,35 @@ exports.getAllTours = (req, res) => {
   });
 };
 
-// NOTE: Create a NEW TOURSDZC
+/** METHOD POST: CREATE a new TOUR
+ * 1) Use Tour.create({}) method to create a new data.
+ * 2) Create a new tour based on the data that comes from the body of the request. ie req.body
+ * 3) .create() method returns a promise so we handle the promise using async-awiat.
+ * 4) We accept the data in new variable newTour and this will have newly created tour with upto date id.
+ * 5) We also need to handle the error, we can use simple try{} cathc(){} block to handle the error, later use seprate module to handle error for our application.
+ */
 
-exports.createTour = (req, res) => {
-  // post request is used to send data from the client to the server. So the data sent is availiable in the request objet of the requestHandler function.
-  // Express does not put the body data of request out of the box. So to have the request data availiable, we need to use middleware ie. app.use(express.json()) middleware in the top level code.
+exports.createTour = async (req, res) => {
+  try {
+    // Traditional way of CREATING & SAVING new tour
+    // const newTour = new Tour({});
+    // newTour.save();
 
-  // console.log(req.body);
+    const newTour = await Tour.create(req.body);
 
-  //Figure out the id of the new object to be created(REST API: we never specify the ID of the object)
-  // Total tours -> 9
-  // tours.length -> 9
-  // tours.length -1 -> 8
-  // If there are n array items, then last array item is always (n-1)
-
-  const newId = tours[tours.length - 1].id + 1;
-
-  // tours[9-1] -> tours[8] -> last element -> .id => 8 -> +1 => 9 = newId
-
-  // Combine the newId and the request body data to form one object
-  const newTour = Object.assign({ id: newId }, req.body);
-  //     const newTour = {id: newId, ...req.body}
-
-  // Push the new tour to the array
-  tours.push(newTour);
-
-  // Finally, save/persist the newly pushed data
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour,
-        },
-      });
-    },
-  );
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message:
+        'Error: Invalid Data Send. (NOTE: Do not send this error message in real application, send meaningfull error message to the client',
+    });
+  }
 };
 
 exports.updateTour = (req, res) => {

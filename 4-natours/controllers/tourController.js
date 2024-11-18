@@ -25,8 +25,27 @@ exports.checkBody = (req, res, next) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    //  BUILD QUERY
+    const queryObject = { ...req.query }; // Creating a hard copy of the query object (Using destructuring and creating new object)
 
+    const excludeFields = ['page', 'sort', 'limit', 'fields'];
+    // COMMENT: Removing the fields from the query object
+    excludeFields.forEach((el) => delete queryObject[el]);
+
+    // Way 1 of filtering
+    const query = Tour.find(queryObject); // We do not directly await this. If we do so, we can't use the properties of excludeFields later on
+
+    // Way 2: Chaining special mongoose methods
+    // const query =  Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+
+    // EXECUTE QUERY
+    const tours = await query;
+
+    // SEND RESPONSE
     res.status(200).json({
       status: 'success',
       // Sending no of results we have since its an array we can count the length of that array.

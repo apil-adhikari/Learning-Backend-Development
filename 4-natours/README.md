@@ -56,3 +56,90 @@ Go to your collection. By default you are on "Find" tab. Just select the next on
 
 So don't drop your database everytime this happens
 I believe this is a better option than just dropping your entire database or even collection. Basically because this is why it works after dropping the entire collection. Because mongo is not going to set an index for that field if your first entry is using your new schema with "unique: false".
+
+## Script to `IMPORT` data in DB & `DELETE` data from DB
+
+```JS
+const fs = require('fs');
+
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const Tour = require('../../models/tourModel');
+
+// Loading config.env file's data to process.env
+dotenv.config({ path: './config.env' });
+
+const DB = process.env.DATABASE.replace(
+'<DB_PASSWORD>',
+process.env.DATABASE_PASSWORD,
+);
+
+mongoose.connect(DB).then(() => console.log('DB connected successfully!'));
+
+// READ JSON FILE
+const tours = JSON.parse(
+fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8'),
+);
+
+// IMPORT DATAT INTO DATABASE-------------------------
+const importData = async () => {
+try {
+console.log('Importing data from the file system');
+await Tour.create(tours);
+console.log('Data Successfully Imported!!');
+} catch (err) {
+console.log('Error importing data:', err.message);
+console.log('Full Error Details:', err);
+}
+
+// process.exit(); //Ensuring the process exit after execution
+};
+
+// DELETE ALL DATA FROM DB COLLECTION-------------------------
+const deleteData = async () => {
+try {
+console.log('Deleteing all data in collections');
+await Tour.deleteMany();
+console.log('Data Successfully Deleted!!');
+} catch (err) {
+console.log(err);
+}
+
+process.exit(); //Ensuring the process exit after execution
+};
+
+if (process.argv[2] === '--import') {
+importData();
+} else if (process.argv[2] === '--delete') {
+deleteData();
+} else {
+console.log('Invalid Command. Please use --import or --delete.');
+}
+
+console.log(process.argv);
+```
+
+### When IMPORTING data, this type of validation error may occur due to the `testing data` that we have used before in the FIlE based API: So delete those data and use the `--import` script again
+
+Error importing data: Tour validation failed: imageCover: A tour must have an cover image, summary: A tour must have a description, price: A tour must have a price, maxGroupSize: A tour must have a group size
+Full Error Details: Error: Tour validation failed: imageCover: A tour must have an cover image, summary: A tour must have a description, price: A tour must have a price, maxGroupSize: A tour must have a group size
+
+```JS
+{ "id": 9, "name": "test tour 1", "duration": 8, "difficulty": "medium" },
+  { "id": 10, "name": "test tour 2", "duration": 5, "difficulty": "hard" },
+  {
+    "id": 11,
+    "name": "test tour 3 updated",
+    "duration": 10,
+    "difficulty": "medium",
+    "description": "Updated test tour 3 JUST NOW"
+  },
+  {
+    "id": 12,
+    "name": "test tour 4",
+    "price": 499,
+    "duration": 10,
+    "difficulty": "medium",
+    "description": "This is newly added tour"
+  }
+```

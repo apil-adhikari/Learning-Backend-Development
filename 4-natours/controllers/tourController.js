@@ -70,8 +70,8 @@ exports.createTour = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: 'fail',
-      message:
-        'Error: Invalid Data Send. (NOTE: Do not send this error message in real application, send meaningfull error message to the client',
+      message: err,
+      // 'Error: Invalid Data Send. (NOTE: Do not send this error message in real application, send meaningfull error message to the client',
     });
   }
 };

@@ -23,6 +23,16 @@ exports.checkBody = (req, res, next) => {
   next();
 };
 
+/** Middleware Function to manipulate query string help us to alias top 5 cheap tours
+ * This middleware function prefill the parts of the query object before it reaches to getAllTours()
+ */
+exports.aliasTopTour = async (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
     console.log(req.query);

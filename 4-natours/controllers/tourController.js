@@ -28,26 +28,34 @@ exports.getAllTours = async (req, res) => {
     console.log(req.query);
 
     //  BUILD QUERY
-    // 1) Filtering
+    // 1A) Filtering
     const queryObject = { ...req.query }; // Creating a hard copy of the query object (Using destructuring and creating new object)
 
     const excludeFields = ['page', 'sort', 'limit', 'fields'];
     // COMMENT: Removing the fields from the query object
     excludeFields.forEach((el) => delete queryObject[el]);
 
-    // 2) Advanced Filtering
+    // 2B) Advanced Filtering
     let queryString = JSON.stringify(queryObject);
     queryString = queryString.replace(
       /\b(gte|gt|lte|lt)\b/g,
       (match) => `$${match}`,
     );
-    console.log(JSON.parse(queryString));
 
     // REFERENCE TO HOW TO ADD THE MONGOOSE OPERATOR :::: So Replace gte,gt,lte,lt with $gte,$gt,$lte,$lt using regular expression
     //MONGOOSE OPERATOR:    { difficulty: 'easy', duration: {$gte: 5}}
     //LOGGING OF req.query: { difficulty: 'easy', duration: { gte: '5' } }
 
-    const query = Tour.find(JSON.parse(queryString)); // We do not directly await this. If we do so, we can't use the properties of excludeFields later on
+    let query = Tour.find(JSON.parse(queryString)); // We do not directly await this. If we do so, we can't use the properties of excludeFields later on
+
+    // 2) Sorting
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+      // sort('price ratingsAverage)
+    } else {
+      query = query.sort('-createdAt');
+    }
 
     // EXECUTE QUERY
     const tours = await query;

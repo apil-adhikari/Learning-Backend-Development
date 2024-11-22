@@ -219,3 +219,56 @@ exports.getTour = async (req, res) => {
   //   });
   // }
 };
+
+/**
+ * Handler Function for Aggregation Pipeline (MongoDB Feature)
+ *
+ * Purpose:
+ * - Calculate statistics for tours using the Mongoose Driver.
+ * - Utilize aggregation stages and operators to perform efficient data analysis.
+ *
+ * MongoDB References (v8.0):
+ * - Aggregation Overview: https://www.mongodb.com/docs/manual/aggregation/
+ * - Aggregation Pipeline: https://www.mongodb.com/docs/manual/core/aggregation-pipeline/
+ * - Aggregation Stages: https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/
+ * - Aggregation Operators: https://www.mongodb.com/docs/manual/reference/operator/aggregation/
+ */
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          totalNumberOfTours: { $sum: 1 },
+          totalNumberOfRatings: { $sum: '$ratingsQuantity' },
+          averageRating: { $avg: '$ratingsAverage' },
+          averagePrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: { averagePrice: 1 },
+      },
+      // { stages can be repeated
+      //   $match: { _id: { $ne: 'EASY' } },
+      // },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};

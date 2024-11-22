@@ -1,5 +1,5 @@
-const fs = require('fs');
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 //NOTE: Reading FILE from file based API
 // const tours = JSON.parse(
@@ -35,60 +35,67 @@ exports.aliasTopTour = async (req, res, next) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    console.log(req.query);
+    // console.log(req.query);
 
     //  BUILD QUERY
     // 1A) Filtering
-    const queryObject = { ...req.query }; // Creating a hard copy of the query object (Using destructuring and creating new object)
+    // const queryObject = { ...req.query }; // Creating a hard copy of the query object (Using destructuring and creating new object)
 
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    // COMMENT: Removing the fields from the query object
-    excludeFields.forEach((el) => delete queryObject[el]);
+    // const excludeFields = ['page', 'sort', 'limit', 'fields'];
+    // // COMMENT: Removing the fields from the query object
+    // excludeFields.forEach((el) => delete queryObject[el]);
 
-    // 2B) Advanced Filtering
-    let queryString = JSON.stringify(queryObject);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (match) => `$${match}`,
-    );
+    // // 2B) Advanced Filtering
+    // let queryString = JSON.stringify(queryObject);
+    // queryString = queryString.replace(
+    //   /\b(gte|gt|lte|lt)\b/g,
+    //   (match) => `$${match}`,
+    // );
 
-    // REFERENCE TO HOW TO ADD THE MONGOOSE OPERATOR :::: So Replace gte,gt,lte,lt with $gte,$gt,$lte,$lt using regular expression
-    //MONGOOSE OPERATOR:    { difficulty: 'easy', duration: {$gte: 5}}
-    //LOGGING OF req.query: { difficulty: 'easy', duration: { gte: '5' } }
+    // // REFERENCE TO HOW TO ADD THE MONGOOSE OPERATOR :::: So Replace gte,gt,lte,lt with $gte,$gt,$lte,$lt using regular expression
+    // //MONGOOSE OPERATOR:    { difficulty: 'easy', duration: {$gte: 5}}
+    // //LOGGING OF req.query: { difficulty: 'easy', duration: { gte: '5' } }
 
-    let query = Tour.find(JSON.parse(queryString)); // We do not directly await this. If we do so, we can't use the properties of excludeFields later on
+    // let query = Tour.find(JSON.parse(queryString)); // We do not directly await this. If we do so, we can't use the properties of excludeFields later on
 
-    // 2) Sorting
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-      // sort('price ratingsAverage)
-    } else {
-      query = query.sort('-createdAt');
-    }
+    // // 2) Sorting
+    // if (req.query.sort) {
+    //   const sortBy = req.query.sort.split(',').join(' ');
+    //   query = query.sort(sortBy);
+    //   // sort('price ratingsAverage)
+    // } else {
+    //   query = query.sort('-createdAt');
+    // }
 
-    // 3) Field Limiting
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
+    // // 3) Field Limiting
+    // if (req.query.fields) {
+    //   const fields = req.query.fields.split(',').join(' ');
+    //   query = query.select(fields);
+    // } else {
+    //   query = query.select('-__v');
+    // }
 
     // Pagination (using Page, Limit, Skip)
-    const page = req.query.page * 1 || 1;
-    const perPage = req.query.limit * 1 || 100;
-    const skip = (page - 1) * perPage;
+    // const page = req.query.page * 1 || 1;
+    // const perPage = req.query.limit * 1 || 100;
+    // const skip = (page - 1) * perPage;
 
-    query = query.skip(skip).limit(perPage);
+    // query = query.skip(skip).limit(perPage);
 
-    if (req.query.page) {
-      const numberOfTours = await Tour.countDocuments();
-      if (skip >= numberOfTours) throw new Error('This page does not exist.');
-    }
+    // if (req.query.page) {
+    //   const numberOfTours = await Tour.countDocuments();
+    //   if (skip >= numberOfTours) throw new Error('This page does not exist.');
+    // }
 
     // EXECUTE QUERY
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limit()
+      .paginate();
+
+    const tours = await features.query;
+    console.log(tours);
 
     // Way 2: Chaining special mongoose methods
     // const query =  Tour.find()

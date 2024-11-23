@@ -261,3 +261,25 @@ tourSchema.pre(/^find/, function (next) {
 ```
 
 ---
+
+## **3. Aggregate Middleware**
+
+Aggregate middleware is executed on Mongoose aggregation pipelines. It applies to operations like `aggregate()`.
+
+### Use Case:
+
+- Modify or filter data before running an aggregation pipeline.
+- Automatically exclude sensitive data or apply global filters.
+
+### Example:
+
+```javascript
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // Exclude secret tours
+  next();
+});
+```
+
+Here, the middleware adds a `$match` stage at the beginning of the pipeline to filter out secret tours.
+
+---

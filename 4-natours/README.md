@@ -283,3 +283,56 @@ tourSchema.pre('aggregate', function (next) {
 Here, the middleware adds a `$match` stage at the beginning of the pipeline to filter out secret tours.
 
 ---
+
+## **4. Model Middleware**
+
+Model middleware is executed on Mongoose static methods or actions that interact with the model directly, such as `insertMany()`.
+
+### Use Case:
+
+- Customize behavior for operations like `insertMany`.
+- Enforce rules or manipulate data during batch inserts.
+
+### Example:
+
+```javascript
+userSchema.pre('insertMany', function (next, docs) {
+  console.log('Inserting multiple documents:', docs);
+  next();
+});
+```
+
+> **Note:** Document middleware (like `save`) does not run during `insertMany`. If you want custom logic for batch inserts, use **model middleware**.
+
+---
+
+## **Key Differences Between Middleware Types**
+
+| **Middleware Type** | **Runs On**                                 | **Pre/Post Hooks** | **Common Use Cases**                     |
+| ------------------- | ------------------------------------------- | ------------------ | ---------------------------------------- |
+| **Document**        | Individual documents (e.g., `save`)         | `pre`, `post`      | Hashing passwords, updating timestamps   |
+| **Query**           | Queries (e.g., `find`, `update`)            | `pre`, `post`      | Filtering, logging, or modifying queries |
+| **Aggregate**       | Aggregation pipelines (e.g., `aggregate`)   | `pre`, `post`      | Adding filters to pipelines              |
+| **Model**           | Model-level operations (e.g., `insertMany`) | `pre`, `post`      | Batch inserts, logging, or manipulation  |
+
+---
+
+## **Middleware Workflow**
+
+1. **Pre-Hook**: Runs _before_ the action (e.g., before a document is saved or a query is executed).
+2. **Action**: Executes the main operation (e.g., saving a document or executing a query).
+3. **Post-Hook**: Runs _after_ the action (e.g., after a document is saved or a query is executed).
+
+---
+
+## **Important Notes**
+
+- Middleware must call `next()` to proceed to the next stage in the lifecycle (for `pre` hooks).
+- Middleware is **asynchronous** if it returns a promise or uses `async/await`.
+- Document middleware (like `save`) does **not** trigger on `insertMany` or query-level methods.
+
+---
+
+## **Conclusion**
+
+Mongoose middleware gives you incredible flexibility to automate and manage operations across your MongoDB application. Understanding the **four types of middleware** (document, query, aggregate, and model) helps you implement the right hook at the right time for preprocessing, validation, filtering, or logging.

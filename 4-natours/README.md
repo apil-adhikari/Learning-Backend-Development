@@ -143,3 +143,58 @@ Full Error Details: Error: Tour validation failed: imageCover: A tour must have 
     "description": "This is newly added tour"
   }
 ```
+
+---
+
+# What Are Mongoose > <b><i>Virtual Properties</b></i>?
+
+In Mongoose, virtual properties are fields that are not stored in the database but are derived from other data or computed dynamically. Virtuals are typically used for things like formatting, combining fields, or adding computed values to our documents.
+
+They are defined in a schema and allow us to add logical properties to our model without persisting them to the MongoDB collection.
+
+## Key Characteristics of Virtuals
+
+1. <b>Not Stored in MongoDB:</b> Virtuals exist only in the application and are not saved in the database.
+2. <b>Derived Properties:</b> They are often computed based on other fields in the document.
+3. <b>Getter and Setter Support:</b> Virtuals can define:
+
+- A getter to compute the value dynamically.
+- A setter to update other fields based on the value passed to the virtual.
+
+4. <b>Use in JSON or Object Outputs:</b> You can choose to include virtuals when documents are converted to JSON or plain objects (via `.toJSON()` or `.toObject()`).
+
+NOTE: Virtual Properties cannot be used with `query` as they are not the part of our database.
+
+#### Example Code:
+
+```JavaScript
+const mongoose = require('mongoose');
+
+// Schema
+const userSchema = new mongoose.Schema({
+  firstName: string,
+  lastName: string,
+},
+// We also need to pass these other schema options in the schema: Defining additional Schema Options to display the virtual properties each time data when data is requested with .get() request & is outputed as JSON or as an Object. ie. we want virtuals to be the part of output.
+{
+    toJSON: {
+        virtuals: true,
+    },
+    toObject: {
+        virtuals: true,
+    }
+}
+);
+
+// Define virtual properties on the schema
+userSchema.virtual('fullName).get(function(){
+return `${this.firstName} ${this.lastName}`
+});
+
+// Create a modle
+const User = mongoose.model('User', userSchema);
+
+// Test Example:
+const user = new User({firstName: 'John', lastName: 'Doe' });
+console.log(user.fullName); // Output should be: "John Doe"
+```

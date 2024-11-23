@@ -236,3 +236,28 @@ userSchema.pre('save', async function (next) {
 ```
 
 ---
+
+## **2. Query Middleware**
+
+Query middleware is executed on Mongoose queries. It applies to operations like `find`, `findOne`, `updateMany`, and `findOneAndUpdate`.
+
+### Examples:
+
+- **`find`**: Runs before (`pre`) or after (`post`) any `find` query.
+- **`findOne`**, **`findOneAndUpdate`**, **`updateMany`**.
+
+### Use Case:
+
+- Filter out certain data (e.g., exclude secret fields).
+- Add default conditions to queries.
+
+### Example:
+
+```javascript
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } }); // Exclude secret tours
+  next();
+});
+```
+
+---

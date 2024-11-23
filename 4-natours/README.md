@@ -198,3 +198,41 @@ const User = mongoose.model('User', userSchema);
 const user = new User({firstName: 'John', lastName: 'Doe' });
 console.log(user.fullName); // Output should be: "John Doe"
 ```
+
+# Mongoose Middlewares
+
+Mongoose middleware (also called pre and post hooks) is a powerful feature that allows you to define functions that are executed at specific points during the lifecycle of a Mongoose document or query. These hooks let you intercept and run logic before or after certain actions, like saving, validating, updating, or deleting documents.
+
+# Mongoose Middleware: Types and Overview
+
+Mongoose middleware can be categorized into **four types** based on their scope and the operations they affect: **document, query, aggregate, and model middleware**. Here's an overview of each type:
+
+---
+
+## **1. Document Middleware**
+
+Document middleware is executed on individual Mongoose documents. It applies to operations like saving, validating, and removing documents.
+
+### Examples:
+
+- **`save`**: Runs before (`pre`) or after (`post`) a document is saved.
+- **`validate`**: Runs before a document is validated.
+- **`remove`**: Runs before or after a document is removed.
+
+### Use Case:
+
+- Preprocess or validate document data before saving.
+- Automatically hash passwords or update timestamps.
+
+### Example:
+
+```javascript
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12); // Hash password
+  }
+  next();
+});
+```
+
+---

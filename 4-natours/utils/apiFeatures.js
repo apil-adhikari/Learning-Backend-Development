@@ -41,7 +41,7 @@ class APIFeatures {
     return this;
   }
 
-  limit() {
+  limitFields() {
     // 3) Field Limiting
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
@@ -61,10 +61,10 @@ class APIFeatures {
     this.query = this.query.skip(skip).limit(limit);
 
     // Requesting the page with no data is not error so we don't need this code right now
-    // if (this.queryString.page) {
-    //   const numberOfTours = this.query.countDocuments();
-    //   if (skip >= numberOfTours) throw new Error('This page does not exist!');
-    // }
+    if (this.queryString.page) {
+      const numberOfTours = this.query.countDocuments();
+      if (skip >= numberOfTours) throw new Error('This page does not exist!');
+    }
 
     return this;
   }

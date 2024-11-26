@@ -7,7 +7,8 @@
     "start": "nodemon server.js",
     "start:prod": "set NODE_ENV=production && nodemon server.js",
     "stop-win": "Taskkill /IM node.exe /F",
-    "stop-linux": "killall node"
+    "stop-linux": "killall node",
+    "ndb-debug": "ndb server.js"
   },
   "author": "Apil Adhikari",
   "license": "ISC",
@@ -31,6 +32,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.2",
+    "ndb": "^1.1.5",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3"
   },

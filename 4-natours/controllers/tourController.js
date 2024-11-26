@@ -91,11 +91,9 @@ exports.getAllTours = async (req, res) => {
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
       .sort()
-      .limit()
+      .limitFields()
       .paginate();
-
     const tours = await features.query;
-    console.log(tours);
 
     // Way 2: Chaining special mongoose methods
     // const query =  Tour.find()

@@ -22,14 +22,6 @@ app.use(express.json()); // Helps to parse the request data
 // Custom Middleware
 
 app.use((req, res, next) => {
-  // This get applied to all the requests as we haven't specified in the routing, which is also known as Global Middleware
-  console.log('Hello from the middleware, CUSTOM MIDDLEWARE 1 👋');
-
-  // Call next() when using middleware
-  next();
-});
-
-app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
@@ -88,5 +80,23 @@ app.use((req, res, next) => {
 // Mounting Routers
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+/** Handling UNHANDLED ROUTE
+ * PROBLEM: How to implement route handler for a route that was not catched by any other rotue handler in our app?
+ * SOLUTION:
+ * * All the middleware functions are executed in the same order they are in the code.
+ * * So the idea is that, if the request makes its way below mounting routers, that means, our router werent able catch it. ie. neither tourRouter nor userRouter were able to catch that request.
+ * * If we add a middleware function after mounting the routers, then it means if the request were not catched then it comes to this middleware function.
+ * * * Then we can handle the unhandled route
+ * * * When handleing, we cannot simply use app.get() or app.post() to handle only those request, we need a way to handle all requests with other http request methods.
+ * * * So we use app.all() this means for all http request and to specify the url use use '*' to denote all routes which are not defined.
+ */
+
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on this server!!!`,
+  });
+});
 
 module.exports = app;

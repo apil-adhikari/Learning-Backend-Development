@@ -93,9 +93,32 @@ app.use('/api/v1/users', userRouter);
  */
 
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on this server!!!`,
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} on this server!!!`,
+  // });
+
+  const err = new Error(`Can't find ${req.originalUrl} on this server!!!`);
+  err.status = 'fail';
+  err.statusCode = 404;
+
+  // Argument to next() function call: If we pass any argument to next() function, express automaticall assumes that its an error.
+  next(err);
+});
+
+/** Global Error Handling in Express:
+ * In Express, whenever we create a middleware function with 4 arguments(error first), express uses it as an error handling middleware function.
+ * Example: app.use((err, req, res, next) => {})
+ */
+app.use((err, req, res, next) => {
+  // Getting the status code: If status code is defined in error then use that status code or use 500 (internal server error) as default
+  err.statusCode = err.statusCode || 500;
+  // Getting the status: If there is status defined in error then use that error or use 'error' when there is 500 error statusCode as default
+  err.status = err.status || 'error';
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    messsage: err.message,
   });
 });
 

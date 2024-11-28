@@ -116,8 +116,10 @@ exports.deleteTour = catchAsyncError(async (req, res, next) => {
 
 exports.getTour = catchAsyncError(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
+  console.log(tour);
   // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
 
+  // CHECK IF tour EXISTS, If does not, then use AppError class to generate error message and status code.
   if (!tour) {
     return next(new AppError('No tour found with that ID', 404));
   }

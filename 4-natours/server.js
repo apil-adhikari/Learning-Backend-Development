@@ -1,8 +1,16 @@
 // Require MONGOOSE package
 const mongoose = require('mongoose');
-
-const express = require('express');
 const dotenv = require('dotenv');
+
+// Handling Uncaught Exception:
+process.on('uncaughtException', (err) => {
+  console.log('Uncaught Exception! 💥, Shutting down ...');
+  // console.log(err);
+  console.log(err.name, err.message);
+
+  // Shutting Down
+  process.exit(1); // We really need to crash our application. Node app is in unclean state during this time.
+});
 
 dotenv.config({ path: './config.env' });
 
@@ -49,3 +57,6 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
+
+// Test for Uncaught Exceptions
+// console.log(x);

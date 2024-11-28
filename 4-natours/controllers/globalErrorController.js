@@ -64,16 +64,16 @@ module.exports = (err, req, res, next) => {
     'In Global Error Handler Middleware Function----------------------------',
   );
 
-  // Step 1: Create Deep Clone of err object
-  let error = JSON.parse(JSON.stringify(err));
+  // // Step 1: Create Deep Clone of err object
+  // let error = JSON.parse(JSON.stringify(err));
 
   // Stack Trace
   //   console.log(err.stack);
 
   // Getting the status code: If status code is defined in error then use that status code or use 500 (internal server error) as default
-  error.statusCode = error.statusCode || 500;
+  err.statusCode = err.statusCode || 500;
   // Getting the status: If there is status defined in error then use that error or use 'error' when there is 500 error statusCode as default
-  error.status = error.status || 'error';
+  err.status = err.status || 'error';
 
   // Sending Error Message during Development and Production Enviornment:
   if (process.env.NODE_ENV === 'development') {
@@ -81,8 +81,11 @@ module.exports = (err, req, res, next) => {
       'Step 3: In sendErrorForDevelopmentEnviornment 🧑‍💻----------------------------',
     );
 
-    sendErrorForDevelopmentEnviornment(error, res);
+    sendErrorForDevelopmentEnviornment(err, res);
   } else if (process.env.NODE_ENV === 'production') {
+    // Step 1: Create Deep Clone of err object
+    let error = JSON.parse(JSON.stringify(err));
+
     // Making hard copy of err object
     // let error = { ...err };
     // console.log('Name from Original err Object:', err.name);

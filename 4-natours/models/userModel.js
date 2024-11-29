@@ -1,9 +1,8 @@
 // Start of MODULES
-// Core Modules
-
 // 3d Party Modules
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 // Local Modules
 
@@ -30,7 +29,10 @@ const userSchema = new mongoose.Schema({
     // match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email address'],
 
     // Using validator package
-    validate: [validator.isEmail, 'Please provide a valid email'],
+    validate: [
+      validator.isEmail,
+      'Please provide a valid email eg: name@mail.com',
+    ],
   },
   photo: {
     type: String,
@@ -53,7 +55,27 @@ const userSchema = new mongoose.Schema({
   passwordConfirm: {
     type: String,
     required: [true, 'Please confirm your password'],
+    validate: {
+      // This only works on CREATE and SAVE!!!
+      validator: function (value) {
+        return value === this.password; //abc ===xyz
+      },
+      message: 'Passwords are not the same, they do not match!',
+    },
   },
+});
+
+userSchema.pre('save', async function (next) {
+  // Only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
+
+  // Encrypt/Hash Password with cost of 12
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
+
+  // Deleting passwordConfirm field(not to be presisted on DB)
+  this.passwordConfirm = undefined;
+  next();
 });
 
 // USER MODEL: Creating Model our of userSchema

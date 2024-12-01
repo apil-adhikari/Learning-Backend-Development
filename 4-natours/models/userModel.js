@@ -51,6 +51,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     minLength: [8, 'Password must be atleast 8 characters'],
     maxLenght: [128, 'Password must not be more than 128 characters'],
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -78,6 +79,14 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//USE SCHEMA  Check if the given password is same as the password stored in DataBase
+userSchema.methods.verifyPassword = async function (
+  candidatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 // USER MODEL: Creating Model our of userSchema
 const User = mongoose.model('User', userSchema);

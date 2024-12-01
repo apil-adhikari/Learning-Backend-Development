@@ -5,8 +5,14 @@ const jwt = require('jsonwebtoken');
 // Local Modules
 const User = require('../models/userModel');
 const catchAsyncError = require('../utils/catchAsyncError');
+const AppError = require('../utils/appError');
 
 // End of MOUDLES
+
+const signToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 
 exports.signup = catchAsyncError(async (req, res, next) => {
   /** // BUG
@@ -25,18 +31,53 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  // Loggin User As soon as he signups.
-  // Create TOKEN
-  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+  try {
+    // Create Token and Log In user as soon as they sign up
+    const token = signToken(newUser._id);
 
-  res.status(201).json({
+    res.status(201).json({
+      status: 'success',
+      token: token,
+      data: {
+        user: newUser,
+      },
+    });
+  } catch (err) {
+    // If token creation fails, deleting the resently created new user:
+    await User.findByIdAndDelete(newUser._id);
+    // We should pass error to global error handler function:
+    next(err);
+  }
+});
+
+/** LOGIN
+ * Steps:
+ * First, Read email and password from body.
+ * Second, 1) Chekc if email and password exists
+ *         2) Check if user exists for that email and password is correct
+ *         3) Compare password in DB(encrypted) vs password user entered. [Use bcrypt]
+ *         3) If everything is ok, send token to client
+ */
+exports.login = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1) Chekc if email and password exists
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password!', 400));
+  }
+
+  // 2) Check if user exists for that email and password is correct
+  const user = await User.findOne({ email: email }).select('+password');
+
+  if (!user || !(await user.verifyPassword(password, user.password))) {
+    return next(new AppError('Incorrect Email or Passsword ', 401));
+  }
+
+  console.log(user);
+
+  const token = signToken(user._id);
+  res.status(200).json({
     status: 'success',
-    // Send Token to client
     token: token,
-    data: {
-      user: newUser,
-    },
   });
 });

@@ -81,3 +81,31 @@ exports.login = catchAsyncError(async (req, res, next) => {
     token: token,
   });
 });
+
+/**MIDDLEWARE FUNCTION TO PROTECT ROUTES
+ * STEPS:
+ * 1) Getting the tokens and checking if its there (if it exists.)
+ * 2) Validate the token(#VeryImportant Step) where we veriyt the token
+ * 3)Check if user still exists
+ * 4) Check if user changed the password after the token was issued.
+ */
+exports.protect = catchAsyncError(async (req, res, next) => {
+  let token;
+  // Get the token
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  console.log('TOKEN in Authorization Header: ', token);
+
+  // Check if the token exists?
+  if (!token) {
+    return next(
+      new AppError('You are not logged in! Please login to get access', 401),
+    );
+  }
+  next();
+});

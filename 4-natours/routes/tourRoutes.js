@@ -1,13 +1,6 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
-const {
-  getAllTours,
-  createTour,
-  getTour,
-  updateTour,
-  deleteTour,
-  aliasTopTour,
-} = require('../controllers/tourController');
+const authenticationController = require('../controllers/authenticationController');
 
 /** STEP TO CREATE ROUTER
  * 1) Create a router using express.Router();
@@ -29,7 +22,7 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authenticationController.protect, tourController.getAllTours)
   .post(tourController.createTour);
 router
   .route('/:id')

@@ -27,6 +27,9 @@ app.use(express.json()); // Helps to parse the request data
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+
+  // We can get access to http headers in express using req.headers. This provides header object.
+  // console.log('----Logging REQ HEADERS OBJECT------', req.headers);
   next();
 });
 

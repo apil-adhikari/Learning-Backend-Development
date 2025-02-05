@@ -89,6 +89,34 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     secretTour: { type: Boolean, default: false },
+
+    // START LOCATIONS AND LOCATIONS IN GENERAL(Geospatial data)
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number], // longitude first and latitude second
+      address: String,
+      description: String,
+    },
+
+    // Locations is embedded document
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
   },
   // Defining additional Schema Options to display the virtual properties each time data is outputed as JSON or as an Object. ie. we want virtuals to be the part of output.
   {

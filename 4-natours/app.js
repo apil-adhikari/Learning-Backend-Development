@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/globalErrorController');
@@ -10,14 +11,18 @@ const userRouter = require('./routes/userRoutes');
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
 
-// MIDDLEWARES
+// GLOBAL MIDDLEWARES
+// HELMET Middleware to set security headers in our express app. This should be kept at at the top
+app.use(helmet());
+
+// Development Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
 console.log('Enviornmet: ', process.env.NODE_ENV);
 
-// RATE LIMIT MIDDLEWARE
+// RATE LIMIT MIDDLEWARE: Limit requestsfrom same IP address
 const limiter = rateLimit({
   max: 100,
   windowMs: 60 * 60 * 1000,
@@ -30,10 +35,15 @@ app.use(express.static(`${__dirname}/public`));
 
 // MIDDLEWARE .use() method to use middleware
 // Middleware for reading request body data
-app.use(express.json()); // Helps to parse the request data
+app.use(
+  express.json({
+    limit: '10kb', // This will limit the size of request body
+  }),
+); // Helps to parse the request data
 
 // Custom Middleware
 
+// Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
 

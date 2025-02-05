@@ -138,6 +138,13 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', // Field that we are storing the review
+  localField: '_id',
+});
+
 /**
  * Mongoose Middlewares
  * 1) Document Middleware: Runs before .save() and .create() but not on .insertMany()

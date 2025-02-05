@@ -115,7 +115,7 @@ exports.deleteTour = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getTour = catchAsyncError(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate('reviews');
   // We can use populate before all query starting with find, so we use query middleware do so
   // .populate({
   //   path: 'guides',

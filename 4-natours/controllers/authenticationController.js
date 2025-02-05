@@ -22,6 +22,21 @@ const signToken = (id) =>
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true, // Cookies cannot be accessed or modified by the browser's JavaScript
+  };
+
+  // In production, ensure cookies are only sent over HTTPS
+  if (process.env.NODE === 'production') cookieOptions.secure = true; // Cookies will be sent over encrypted connection such as https only in production enviornment
+
+  res.cookie('jwt', token, cookieOptions);
+
+  // Remove the password form the output. Not sending the password even when creating a new user ie. we should hide the password.
+  user.password = undefined;
+
   res.status(statusCode).json({
     status: 'success',
     token: token,

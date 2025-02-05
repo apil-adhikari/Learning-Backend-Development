@@ -1,5 +1,6 @@
 const Review = require('../models/reviewModel');
 const catchAsyncError = require('../utils/catchAsyncError');
+const factory = require('./handleFactory');
 
 exports.getAllReviews = catchAsyncError(async (req, res, next) => {
   // Adding a nested GET endpoint. Here we get the all reviews of a tour if the tourId exists in the parameter(ie if  we use  nexted routes) else we get all reviews
@@ -37,3 +38,6 @@ exports.createReview = catchAsyncError(async (req, res, next) => {
     },
   });
 });
+
+// DELETE a review
+exports.deleteReview = factory.deleteOne(Review);

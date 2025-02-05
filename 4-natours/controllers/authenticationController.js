@@ -18,6 +18,19 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+/**This will call signToken and also send the response with dynamic static codes passed in the function. */
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token: token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = catchAsyncError(async (req, res, next) => {
   /** // BUG
    *  SECURITY FLAW:
@@ -37,23 +50,7 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     role: req.body.role,
   });
 
-  try {
-    // Create Token and Log In user as soon as they sign up
-    const token = signToken(newUser._id);
-
-    res.status(201).json({
-      status: 'success',
-      token: token,
-      data: {
-        user: newUser,
-      },
-    });
-  } catch (err) {
-    // If token creation fails, deleting the resently created new user:
-    await User.findByIdAndDelete(newUser._id);
-    // We should pass error to global error handler function:
-    next(err);
-  }
+  createSendToken(newUser, 201, res);
 });
 
 /** LOGIN
@@ -80,12 +77,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
   }
 
   console.log(user);
-
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token: token,
-  });
+  createSendToken(user, 200, res);
 });
 
 /**MIDDLEWARE FUNCTION TO PROTECT ROUTES
@@ -234,10 +226,24 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
 
   // 3) Update changedPasswordAt property for the user
   // 4) Log the user in, by send JWT to client
-  const token = signToken(user._id);
+  createSendToken(user, 200, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+// UPDATE PASSWORD (this will allow the logged in user to update their password.)
+exports.updatePassword = catchAsyncError(async (req, res, next) => {
+  // 1) Get the user form the collection
+  const user = await User.findById(req.user.id).select('+password'); // this is availiable form the middleware wher we pass user in req.user
+
+  // 2) Check if the POSTed password is correct
+  if (!(await user.verifyPassword(req.body.passwordCurrent, user.password))) {
+    return next(new AppError('Your current password is wrontg.', 401));
+  }
+  // 3) If so, update the password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+  // User.findByIdAndUpdate will not work as intended!!!
+
+  // 4) Log user in, send JWT
+  createSendToken(user, 200, res);
 });

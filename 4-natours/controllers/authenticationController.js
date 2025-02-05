@@ -1,4 +1,5 @@
 // Start of MODULES
+const crypto = require('crypto');
 const { promisify } = require('util');
 
 // 3rd Party Modules
@@ -203,4 +204,40 @@ exports.forgetPassword = catchAsyncError(async (req, res, next) => {
     );
   }
 });
-exports.resetPassword = (req, res, next) => {};
+
+// PASSWORD RESET
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  // 1) Get user based on token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: {
+      $gt: Date.now(),
+    },
+  });
+
+  // 2) It token has not expired and there is a user, we set new password
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired!', 400));
+  }
+
+  // We get the password and passwordConfirm
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save(); // /we need validator for this time.
+
+  // 3) Update changedPasswordAt property for the user
+  // 4) Log the user in, by send JWT to client
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+  });
+});

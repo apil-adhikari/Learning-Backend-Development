@@ -91,6 +91,15 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// Reset Password Password Changed At
+userSchema.pre('save', function (next) {
+  // if we modified the password property
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; //Sometimes the JWT token can issue faster than the this timestapmps which will lead us not to be able to login. So, we changed the timestamps to 1 second before the Date.now(). This insures the token wil be created 1 second after the password has been changed.
+  next();
+});
+
 //USE SCHEMA  Check if the given password is same as the password stored in DataBase
 userSchema.methods.verifyPassword = async function (
   candidatePassword,

@@ -64,6 +64,8 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same, they do not match!',
     },
   },
+  // Password changed
+  passwordChangedAt: Date,
 });
 
 // Encrypting Password
@@ -86,6 +88,21 @@ userSchema.methods.verifyPassword = async function (
   userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+//
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    // console.log(changedTimestamp, JWTTimestamp);
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  // false mean NOT changed
+  return false; // by default we set password changed to false
 };
 
 // USER MODEL: Creating Model our of userSchema

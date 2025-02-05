@@ -1,4 +1,6 @@
 // Start of MODULES
+const { promisify } = require('util');
+
 // 3rd Party Modules
 const jwt = require('jsonwebtoken');
 
@@ -29,6 +31,7 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
 
   try {
@@ -99,7 +102,7 @@ exports.protect = catchAsyncError(async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
   }
 
-  console.log('TOKEN in Authorization Header: ', token);
+  // console.log('TOKEN in Authorization Header: ', token);
 
   // Check if the token exists?
   if (!token) {
@@ -107,5 +110,30 @@ exports.protect = catchAsyncError(async (req, res, next) => {
       new AppError('You are not logged in! Please login to get access', 401),
     );
   }
+
+  // 2) Verify the token[Check if the payload is changed]
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  console.log(decoded);
+
+  // 3) Check if the user exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new AppError(
+        'The user belonging to this user does no loger exists.',
+        401,
+      ),
+    );
+  }
+
+  // 4) Check if the user has changed the password after the token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please log in again.', 401),
+    );
+  }
+
+  // GRANT ACCESS TO PROTECTED ROUTE
+  req.user = currentUser;
   next();
 });

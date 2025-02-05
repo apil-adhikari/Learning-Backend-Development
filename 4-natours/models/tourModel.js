@@ -119,7 +119,7 @@ const tourSchema = new mongoose.Schema(
       },
     ],
 
-    // Embedding USER document
+    // REFERENCE TO USER for guides
     guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   // Defining additional Schema Options to display the virtual properties each time data is outputed as JSON or as an Object. ie. we want virtuals to be the part of output.
@@ -179,6 +179,15 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
 
   this.start = Date.now();
+
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
 
   next();
 });

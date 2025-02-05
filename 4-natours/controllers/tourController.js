@@ -116,6 +116,11 @@ exports.deleteTour = catchAsyncError(async (req, res, next) => {
 
 exports.getTour = catchAsyncError(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
+  // We can use populate before all query starting with find, so we use query middleware do so
+  // .populate({
+  //   path: 'guides',
+  //   select: '-__v -passwordChangedAt',
+  // }); // the populate() will fill there reference wehave given with the data but only in the query.
   console.log(tour);
   // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
 

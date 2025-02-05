@@ -32,6 +32,7 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
+    role: req.body.role,
   });
 
   try {
@@ -137,3 +138,17 @@ exports.protect = catchAsyncError(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// AUTHORIZATION using user roles and setting permissions
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    // roles ['admin','lead-guide']✔️ but role='user'❌ doesnot have access
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action!', 403),
+      );
+    }
+
+    next();
+  };

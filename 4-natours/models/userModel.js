@@ -75,6 +75,13 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+
+  // Setting active falg
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // Encrypting Password
@@ -97,6 +104,13 @@ userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000; //Sometimes the JWT token can issue faster than the this timestapmps which will lead us not to be able to login. So, we changed the timestamps to 1 second before the Date.now(). This insures the token wil be created 1 second after the password has been changed.
+  next();
+});
+
+// Using Query Middleware to do certain action before doing query
+userSchema.pre(/^find/, function (next) {
+  // this points to current query
+  this.find({ active: { $ne: false } });
   next();
 });
 

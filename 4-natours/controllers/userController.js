@@ -61,6 +61,16 @@ exports.updateMe = catchAsyncError(async (req, res, next) => {
   });
 });
 
+// Deleting current user
+exports.deleteMe = catchAsyncError(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, { active: false }); // we can set the active to false
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',

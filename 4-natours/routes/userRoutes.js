@@ -33,6 +33,12 @@ router.patch(
   userController.updateMe,
 );
 
+router.delete(
+  '/deleteMe',
+  authenticationContoller.protect,
+  userController.deleteMe,
+);
+
 // Users Route:
 router
   .route('/')

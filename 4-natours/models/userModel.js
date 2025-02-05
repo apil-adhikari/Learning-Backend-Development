@@ -1,4 +1,5 @@
 // Start of MODULES
+const crypto = require('crypto');
 // 3d Party Modules
 const mongoose = require('mongoose');
 const validator = require('validator');
@@ -72,6 +73,8 @@ const userSchema = new mongoose.Schema({
   },
   // Password changed
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // Encrypting Password
@@ -109,6 +112,22 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // false mean NOT changed
   return false; // by default we set password changed to false
+};
+
+// Forgot Password
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // This wil expire in 10 minutes
+
+  return resetToken;
 };
 
 // USER MODEL: Creating Model our of userSchema

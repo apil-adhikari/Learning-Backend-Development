@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSalitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/globalErrorController');
@@ -41,8 +43,14 @@ app.use(
   }),
 ); // Helps to parse the request data
 
-// Custom Middleware
+// DATA SANITIZATION MIDDLEWARE----------
+// 1) Data sanitization against NoSQL query injection
+app.use(mongoSalitize());
 
+// 2) Data sanitization against XSS
+app.use(xss());
+
+// Custom Middleware
 // Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();

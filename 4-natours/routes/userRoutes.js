@@ -19,7 +19,7 @@ router.post('/signup', authenticationContoller.signup);
 router.post('/login', authenticationContoller.login);
 
 router.post('/forgotPassword', authenticationContoller.forgetPassword);
-router.post('/resetPassword', authenticationContoller.resetPassword);
+router.patch('/resetPassword/:token', authenticationContoller.resetPassword);
 
 // Users Route:
 router

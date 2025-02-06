@@ -13,21 +13,23 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsyncError(async (req, res, next) => {
-  const users = await User.find();
+exports.getAllUsers = factory.getAll(User);
 
-  // SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    // Sending no of results we have since its an array we can count the length of that array.
-    results: `${users.length} results found`,
-    // Envolope for our data
-    data: {
-      // url's endpoint: send the data that we need to send as response
-      users: users,
-    },
-  });
-});
+// exports.getAllUsers = catchAsyncError(async (req, res, next) => {
+//   const users = await User.find();
+
+//   // SEND RESPONSE
+//   res.status(200).json({
+//     status: 'success',
+//     // Sending no of results we have since its an array we can count the length of that array.
+//     results: `${users.length} results found`,
+//     // Envolope for our data
+//     data: {
+//       // url's endpoint: send the data that we need to send as response
+//       users: users,
+//     },
+//   });
+// });
 
 exports.updateMe = catchAsyncError(async (req, res, next) => {
   /**
@@ -75,16 +77,18 @@ exports.deleteMe = catchAsyncError(async (req, res, next) => {
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined!',
+    message: 'This route is not defined! Please user /signup instead.',
   });
 };
 
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
+exports.getUser = factory.getOne(User);
+
+// exports.getUser = (req, res) => {
+//   res.status(500).json({
+//     status: 'error',
+//     message: 'This route is not yet defined!',
+//   });
+// };
 
 // Do  NOT update password with
 exports.updateUser = factory.updateOne(User);

@@ -1,6 +1,6 @@
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
+// const APIFeatures = require('../utils/apiFeatures');
+// const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
 const factory = require('./handleFactory');
 
@@ -36,27 +36,30 @@ exports.aliasTopTour = async (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsyncError(async (req, res, next) => {
-  // EXECUTE QUERY
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
+// GET all tours using factory function
+exports.getAllTours = factory.getAll(Tour);
 
-  // SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    // Sending no of results we have since its an array we can count the length of that array.
-    results: `${tours.length} results found`,
-    // Envolope for our data
-    data: {
-      // url's endpoint: send the data that we need to send as response
-      tours: tours,
-    },
-  });
-});
+// exports.getAllTours = catchAsyncError(async (req, res, next) => {
+//   // EXECUTE QUERY
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
+//   const tours = await features.query;
+
+//   // SEND RESPONSE
+//   res.status(200).json({
+//     status: 'success',
+//     // Sending no of results we have since its an array we can count the length of that array.
+//     results: `${tours.length} results found`,
+//     // Envolope for our data
+//     data: {
+//       // url's endpoint: send the data that we need to send as response
+//       tours: tours,
+//     },
+//   });
+// });
 
 /** METHOD POST: CREATE a new TOUR
  * 1) Use Tour.create({}) method to create a new data.
@@ -120,28 +123,32 @@ exports.deleteTour = factory.deleteOne(Tour);
 //   });
 // });
 
-exports.getTour = catchAsyncError(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  // We can use populate before all query starting with find, so we use query middleware do so
-  // .populate({
-  //   path: 'guides',
-  //   select: '-__v -passwordChangedAt',
-  // }); // the populate() will fill there reference wehave given with the data but only in the query.
-  console.log(tour);
-  // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
-
-  // CHECK IF tour EXISTS, If does not, then use AppError class to generate error message and status code.
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: tour,
-    },
-  });
+exports.getTour = factory.getOne(Tour, {
+  path: 'reviews',
 });
+
+// exports.getTour = catchAsyncError(async (req, res, next) => {
+//   const tour = await Tour.findById(req.params.id).populate('reviews');
+//   // We can use populate before all query starting with find, so we use query middleware do so
+//   // .populate({
+//   //   path: 'guides',
+//   //   select: '-__v -passwordChangedAt',
+//   // }); // the populate() will fill there reference wehave given with the data but only in the query.
+//   console.log(tour);
+//   // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
+
+//   // CHECK IF tour EXISTS, If does not, then use AppError class to generate error message and status code.
+//   if (!tour) {
+//     return next(new AppError('No tour found with that ID', 404));
+//   }
+
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour: tour,
+//     },
+//   });
+// });
 
 /**
  * Handler Function for Aggregation Pipeline (MongoDB Feature)

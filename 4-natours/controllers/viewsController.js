@@ -9,7 +9,7 @@ exports.getOverview = catchAsyncError(async (req, res, next) => {
   // 3) Render the template using the tour data from step 1
 
   res.status(200).render('overview', {
-    title: 'All Tours',
+    title: 'GhumGham',
     tours,
   });
 });
@@ -25,7 +25,7 @@ exports.getTour = catchAsyncError(async (req, res) => {
   // 3) Render the template from the data we got for step 1
 
   res.status(200).render('tour', {
-    title: 'Tour Title',
+    title: `GhumGham | ${tour.name} Tour`,
     tour,
   });
 });

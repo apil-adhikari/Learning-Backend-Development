@@ -1,5 +1,8 @@
 extends base 
 
+block append head 
+  script(src='/js/mapbox.js')
+  
 mixin reviewCard(review)
   .reviews__card
     .reviews__avatar
@@ -15,7 +18,7 @@ block content
   section.section-header
     .header__hero
       .header__hero-overlay &nbsp;
-      img.header__hero-img(src=`/img/${tour.imageCover}`, alt=tour.name)
+      img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=tour.name)
 
     .heading-box
       h1.heading-primary
@@ -74,7 +77,7 @@ block content
         img(class=`picture-box__img picture-box__img--${index+1}`, src=`/img/tours/${image}`, alt=tour.name)
 
   section.section-map
-    #map
+    #map(data-locations=`${JSON.stringify(tour.locations)}`)
 
   section.section-reviews
     .reviews
@@ -91,3 +94,5 @@ block content
         h2.heading-secondary What are you waiting for?
         p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
         button.btn.btn--green.span-all-rows Book tour now!
+
+

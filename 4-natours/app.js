@@ -13,6 +13,7 @@ const globalErrorHandler = require('./controllers/globalErrorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
@@ -135,18 +136,15 @@ app.use((req, res, next) => {
 // Creating Routers
 
 // 3) ROUTES
-app.get('/', (req, res) => {
-  res.status(200).render('base', {
-    tour: 'The Forest Hiker',
-    user: 'Apil',
-  });
-});
-
 // Connecting new Router with our Application(we use middleware)
 // Mounting Routers
+
+// FRONTEND PART ROUTES
+app.use('/', viewRouter);
+
+// BACKEND PART API ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-
 app.use('/api/v1/reviews', reviewRouter);
 
 /** Handling UNHANDLED ROUTE

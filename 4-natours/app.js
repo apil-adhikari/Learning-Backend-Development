@@ -1,3 +1,5 @@
+const path = require('path');
+
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -15,7 +17,17 @@ const reviewRouter = require('./routes/reviewRoutes');
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
 
-// GLOBAL MIDDLEWARES
+// Setting View Engine as Pug
+app.set('view engine', 'pug');
+
+// Location of views(templates)
+app.set('views', path.join(__dirname, 'views'));
+
+// GLOBAL MIDDLEWARES]
+
+// Serving static file using builtin middleware
+app.use(express.static(path.join(__dirname, 'public')));
+
 // HELMET Middleware to set security headers in our express app. This should be kept at at the top
 app.use(helmet());
 
@@ -33,9 +45,6 @@ const limiter = rateLimit({
   message: 'Too many request from this IP. Please try again in an hour.',
 });
 app.use('/api', limiter);
-
-// Serving static file using builtin middleware
-app.use(express.static(`${__dirname}/public`));
 
 // MIDDLEWARE .use() method to use middleware
 // Middleware for reading request body data
@@ -126,6 +135,13 @@ app.use((req, res, next) => {
 // Creating Routers
 
 // 3) ROUTES
+app.get('/', (req, res) => {
+  res.status(200).render('base', {
+    tour: 'The Forest Hiker',
+    user: 'Apil',
+  });
+});
+
 // Connecting new Router with our Application(we use middleware)
 // Mounting Routers
 app.use('/api/v1/tours', tourRouter);

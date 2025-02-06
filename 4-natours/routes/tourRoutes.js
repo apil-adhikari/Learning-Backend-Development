@@ -42,6 +42,12 @@ router
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin);
+// /tours-within?distance=20&center=-40,45&unit=km => using query stiring
+// /tours-within/20/center/-40,45/km
+
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(

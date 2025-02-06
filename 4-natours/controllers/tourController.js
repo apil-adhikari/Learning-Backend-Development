@@ -1,6 +1,6 @@
 const Tour = require('../models/tourModel');
 // const APIFeatures = require('../utils/apiFeatures');
-// const AppError = require('../utils/appError');
+const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
 const factory = require('./handleFactory');
 
@@ -242,6 +242,41 @@ exports.getMonthlyPlan = catchAsyncError(async (req, res, next) => {
     status: 'success',
     data: {
       plan,
+    },
+  });
+});
+
+// '/tour-within/:distance/center/:latlng/unit/:unit'
+// /tours-within?distance=20&center=-40,45&unit=km => using query stiring not a good way to specify
+// /tours-within/20/center/34.238300, -118.682336/unit/km
+
+// getToursWithin
+exports.getToursWithin = catchAsyncError(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // Radius of sphere in Radians
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitude and longitude in the format lat,lng',
+        400,
+      ),
+    );
+  }
+  // console.log(distance, lat, lng, unit);
+
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
     },
   });
 });

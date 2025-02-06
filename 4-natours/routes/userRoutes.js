@@ -21,32 +21,20 @@ router.post('/login', authenticationContoller.login);
 router.post('/forgotPassword', authenticationContoller.forgetPassword);
 router.patch('/resetPassword/:token', authenticationContoller.resetPassword);
 
-router.get(
-  '/me',
-  authenticationContoller.protect,
-  userController.getMe,
-  userController.getUser,
-);
+// We should protect all routes after this
 
-router.patch(
-  '/updateMyPassword',
-  authenticationContoller.protect,
-  authenticationContoller.updatePassword,
-);
+// .protect() is technically a middleware, it runs in a sequence. so when we can use .protect() middlewre in router to check for authenticated user
+router.use(authenticationContoller.protect);
 
-router.patch(
-  '/updateMe',
-  authenticationContoller.protect,
-  userController.updateMe,
-);
-
-router.delete(
-  '/deleteMe',
-  authenticationContoller.protect,
-  userController.deleteMe,
-);
+router.get('/me', userController.getMe, userController.getUser);
+router.patch('/updateMyPassword', authenticationContoller.updatePassword);
+router.patch('/updateMe', userController.updateMe);
+router.delete('/deleteMe', userController.deleteMe);
 
 // Users Route:
+// Below routes should be only be accessed by amdins so we can use middleware again
+router.use(authenticationContoller.restrictTo('admin'));
+
 router
   .route('/')
   .get(userController.getAllUsers)

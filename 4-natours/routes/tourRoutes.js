@@ -1,7 +1,7 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authenticationController = require('../controllers/authenticationController');
-const reviewRouter = require('../routes/reviewRoutes');
+const reviewRouter = require('./reviewRoutes');
 
 /** STEP TO CREATE ROUTER
  * 1) Create a router using express.Router();
@@ -31,18 +31,32 @@ router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTour, tourController.getAllTours);
 
-router.route('/tour-stats').get(tourController.getTourStats);
+router
+  .route('/tour-stats')
+  .get(
+    authenticationController.protect,
+    authenticationController.restrictTo('admin', 'lead-guide', 'guide'),
+    tourController.getTourStats,
+  );
 
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
-  .get(authenticationController.protect, tourController.getAllTours)
-  .post(tourController.createTour);
+  .get(tourController.getAllTours)
+  .post(
+    authenticationController.protect,
+    authenticationController.restrictTo('admin', 'lead-guide'),
+    tourController.createTour,
+  );
 router
   .route('/:id')
-  .get(tourController.getTour)
-  .patch(tourController.updateTour)
+  .get(authenticationController.protect, tourController.getTour)
+  .patch(
+    authenticationController.protect,
+    authenticationController.restrictTo('admin', 'lead-guide'),
+    tourController.updateTour,
+  )
   .delete(
     authenticationController.protect,
     authenticationController.restrictTo('admin', 'lead-guide'),

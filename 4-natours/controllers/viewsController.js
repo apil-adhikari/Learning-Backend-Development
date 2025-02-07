@@ -29,3 +29,11 @@ exports.getTour = catchAsyncError(async (req, res) => {
     tour,
   });
 });
+
+// GET LOGIN FORM CONTROLLER
+exports.getLoginForm = (req, res) => {
+  // Set status and send render('template-name')
+  res.status(200).render('login', {
+    title: 'Log in to your account',
+  });
+};

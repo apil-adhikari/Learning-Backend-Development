@@ -36,7 +36,7 @@ const sendErrorForDevelopmentEnviornment = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
-    messsage: err.message,
+    message: err.message,
     stack: err.stack,
   });
 };
@@ -47,7 +47,7 @@ const sendErrorForProductionEnviornment = (err, res) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
-      messsage: err.message,
+      message: err.message,
     });
     // Programming Error or other unknown error: Don't leak error details
   } else {

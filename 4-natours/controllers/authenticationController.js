@@ -151,6 +151,34 @@ exports.protect = catchAsyncError(async (req, res, next) => {
   next();
 });
 
+// Only for rendered pages, no errors.
+exports.isLoggedIn = catchAsyncError(async (req, res, next) => {
+  if (req.cookies && req.cookies.jwt) {
+    // 2) Verify the token[Check if the payload is changed]
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET,
+    );
+    console.log(decoded);
+
+    // 2) Check if the user exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+
+    // 4) Check if the user has changed the password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    // There is a logged in user (we pass the currentUser to res.locals which is accessible to our pug template)
+    res.locals.user = currentUser;
+    return next();
+  }
+  next();
+});
+
 // AUTHORIZATION using user roles and setting permissions
 exports.restrictTo =
   (...roles) =>

@@ -110,6 +110,9 @@ exports.protect = catchAsyncError(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+    // Also setting the cookie as jwt if there is no authorization came in header
+  } else if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   // console.log('TOKEN in Authorization Header: ', token);

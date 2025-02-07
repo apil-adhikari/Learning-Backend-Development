@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const mongoSalitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/globalErrorController');
@@ -30,7 +31,27 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HELMET Middleware to set security headers in our express app. This should be kept at at the top
-app.use(helmet());
+// app.use(helmet());
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          'https://cdn.jsdelivr.net',
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+        ],
+        styleSrc: ["'self'", 'https://fonts.googleapis.com'],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", 'https://cdn.jsdelivr.net'], // ✅ Allows fetch/Axios requests
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      },
+    },
+  }),
+);
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {
@@ -54,6 +75,9 @@ app.use(
     limit: '10kb', // This will limit the size of request body
   }),
 ); // Helps to parse the request data
+
+// USING cookie-parser: It will parse the data from the cookie
+app.use(cookieParser());
 
 // DATA SANITIZATION MIDDLEWARE----------
 // 1) Data sanitization against NoSQL query injection
@@ -80,7 +104,7 @@ app.use(
 // Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-
+  console.log(req.cookies);
   // We can get access to http headers in express using req.headers. This provides header object.
   // console.log('----Logging REQ HEADERS OBJECT------', req.headers);
   next();

@@ -46,7 +46,12 @@ app.use(
         ],
         styleSrc: ["'self'", 'https://fonts.googleapis.com'],
         imgSrc: ["'self'", 'data:'],
-        connectSrc: ["'self'", 'https://cdn.jsdelivr.net'], // ✅ Allows fetch/Axios requests
+        connectSrc: [
+          "'self'",
+          'https://cdn.jsdelivr.net',
+          'ws://127.0.0.1:*', // ✅ Allows WebSocket connections
+          'wss://127.0.0.1:*', // ✅ Secure WebSocket (optional)
+        ],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       },
     },

@@ -37,3 +37,10 @@ exports.getLoginForm = (req, res) => {
     title: 'Log in to your account',
   });
 };
+
+// SIGNUP CONTROLLER
+exports.getSignupForm = (req, res) => {
+  res.status(200).render('signup', {
+    title: `GhumGham | Signup`,
+  });
+};

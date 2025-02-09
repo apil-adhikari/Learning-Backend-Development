@@ -26,6 +26,17 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // GLOBAL MIDDLEWARES]
+app.use(express.urlencoded({ extended: true }));
+// MIDDLEWARE .use() method to use middleware
+// Middleware for reading request body data
+app.use(
+  express.json({
+    limit: '10kb', // This will limit the size of request body
+  }),
+); // Helps to parse the request data
+
+// USING cookie-parser: It will parse the data from the cookie
+app.use(cookieParser());
 
 // Serving static file using builtin middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -72,17 +83,6 @@ const limiter = rateLimit({
   message: 'Too many request from this IP. Please try again in an hour.',
 });
 app.use('/api', limiter);
-
-// MIDDLEWARE .use() method to use middleware
-// Middleware for reading request body data
-app.use(
-  express.json({
-    limit: '10kb', // This will limit the size of request body
-  }),
-); // Helps to parse the request data
-
-// USING cookie-parser: It will parse the data from the cookie
-app.use(cookieParser());
 
 // DATA SANITIZATION MIDDLEWARE----------
 // 1) Data sanitization against NoSQL query injection

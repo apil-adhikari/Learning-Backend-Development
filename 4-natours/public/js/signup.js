@@ -1,0 +1,43 @@
+/*eslint-disable*/
+import axios from 'axios';
+import { showAlert } from './alerts';
+
+export const signup = async (
+  name,
+  email,
+  photo,
+  role,
+  password,
+  passwordConfirm,
+) => {
+  console.log('SIGNUP');
+  console.log(name, email, photo, role, password, passwordConfirm);
+  try {
+    const result = await axios({
+      method: 'POST',
+      url: 'http://127.0.0.1:8000/api/v1/users/signup',
+      data: {
+        name,
+        email,
+        photo,
+        role,
+        password,
+        passwordConfirm,
+      },
+    });
+
+    if (result.data.status === 'success') {
+      showAlert('success', 'Account created successfully! 🎉');
+      window.setTimeout(() => {
+        location.assign('/'); // Redirect to home after signup
+      }, 3000);
+    }
+    console.log(result);
+  } catch (error) {
+    console.log(error);
+    showAlert(
+      'error',
+      `${error.response?.data?.message || 'Signup failed!'} ❌`,
+    );
+  }
+};

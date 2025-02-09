@@ -46,25 +46,38 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
+// SIGNUP CONTROLLER
 exports.signup = catchAsyncError(async (req, res, next) => {
-  /** // BUG
-   *  SECURITY FLAW:
-   * *  // FIXME: const newUser = await User.create(req.body);
-   * 1. This create user based on the data that comes directly from req.body through the client.
-   * 2. We create a new user with all the data that is coming with the body.
-   * 3. Actual Problem :  Any one can specify role as an ADMIN. (Anyone can create an account with an admin role). Which is not what we need.
-   * // FIX : Taking only required fields only so that no other data will be saved. Only allow data we actaully need.
-   */
+  // Sanitize and only allow the required fields from the request body
+  const { name, email, password, passwordConfirm, role } = req.body;
 
+  // Only allow 'user' or 'guide' roles, default to 'user' if role is not specified or is invalid
+  const sanitizedRole = ['user', 'guide', 'lead-guide', 'admin'].includes(role)
+    ? role
+    : 'user';
+
+  // Check if email already exists in the database (duplicate key error handling)
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(
+      new AppError(
+        'Email already exists! Please login or use a different email.',
+        400,
+      ),
+    );
+  }
+
+  // Create new user with the necessary fields
   const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    passwordChangedAt: req.body.passwordChangedAt,
-    role: req.body.role,
+    name,
+    email,
+    password,
+    passwordConfirm,
+    passwordChangedAt: undefined, // Don't allow the client to set this field
+    role: sanitizedRole, // Use the sanitized role value
   });
 
+  // Send token and respond
   createSendToken(newUser, 201, res);
 });
 
@@ -77,7 +90,9 @@ exports.signup = catchAsyncError(async (req, res, next) => {
  *         3) If everything is ok, send token to client
  */
 exports.login = catchAsyncError(async (req, res, next) => {
+  console.log('-------------------IN LOGIN ----------------');
   const { email, password } = req.body;
+  console.log(email, password);
 
   // 1) Chekc if email and password exists
   if (!email || !password) {
@@ -91,7 +106,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new AppError('Incorrect Email or Passsword ', 401));
   }
 
-  console.log(user);
+  console.log('USER DATA AFTER LOGIN:::\n', user);
   createSendToken(user, 200, res);
 });
 
@@ -138,6 +153,7 @@ exports.protect = catchAsyncError(async (req, res, next) => {
 
   // 2) Verify the token[Check if the payload is changed]
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  console.log('--------------In protect()-------------');
   console.log(decoded);
 
   // 3) Check if the user exists
@@ -172,7 +188,11 @@ exports.isLoggedIn = async (req, res, next) => {
         req.cookies.jwt,
         process.env.JWT_SECRET,
       );
-      console.log(decoded);
+      console.log(
+        '-------------In isLoggedIn| DECODED DATA-------- :\n',
+        decoded,
+        '\n-----------------',
+      );
 
       // 2) Check if the user exists
       const currentUser = await User.findById(decoded.id);

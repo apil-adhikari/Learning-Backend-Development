@@ -48,6 +48,7 @@ const createSendToken = (user, statusCode, res) => {
 
 // SIGNUP CONTROLLER
 exports.signup = catchAsyncError(async (req, res, next) => {
+  console.log('IN signup');
   // Sanitize and only allow the required fields from the request body
   const { name, email, password, passwordConfirm, role } = req.body;
 

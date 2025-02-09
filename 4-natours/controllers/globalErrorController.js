@@ -33,36 +33,67 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Your token has epired! Please log in again.', 401);
 
-const sendErrorForDevelopmentEnviornment = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-};
-
-const sendErrorForProductionEnviornment = (err, res) => {
-  // Operational Error: Trusted Errors: Send message to Client
-  console.log('isOperational:', err.isOperational);
-  if (err.isOperational) {
+// SEND ERROR IN DEVELOPMENT ENVIRONMENT
+const sendErrorForDevelopmentEnviornment = (err, req, res) => {
+  // API: checking if site url starts with '/api'?
+  if (req.originalUrl.startsWith('/api')) {
     res.status(err.statusCode).json({
       status: err.status,
+      error: err,
       message: err.message,
+      stack: err.stack,
     });
-    // Programming Error or other unknown error: Don't leak error details
   } else {
-    // 1) Console error
-    console.error('ERROR 💣', err);
-
-    // 2) Send a generic message
-
-    res.status(500).json({
-      status: 'error',
-      // message: err,
-
-      message: 'No Operational Error: Something went wrong!!!',
+    // RENDERED WEBSITE ERROR
+    console.error('ERROR 💥', err);
+    res.status(err.statusCode).render('errorTemplate', {
+      title: 'Something went wrong!',
+      errorMessage: err.message,
     });
+  }
+};
+
+// SEND ERROR IN PRODUCTION ENVIRONMENT
+const sendErrorForProductionEnviornment = (err, req, res) => {
+  // a) API ERROR
+  if (req.originalUrl.startsWith('/api')) {
+    // Operational Error: Trusted Errors: Send message to Client
+    console.log('isOperational:', err.isOperational);
+    if (err.isOperational) {
+      res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+      // Programming Error or other unknown error: Don't leak error details
+    } else {
+      // Send a generic message
+      console.error('ERROR 💥', err);
+      res.status(500).json({
+        status: 'error',
+        // message: err,
+        message: 'No Operational Error: Something went wrong!!!',
+      });
+    }
+  } else {
+    // b) RENDERED WEBSITE
+    // Operational Error: Trusted Errors: Send message to Client
+    console.log('isOperational:', err.isOperational);
+    if (err.isOperational) {
+      console.log(err);
+
+      res.status(err.statusCode).render('errorTemplate', {
+        title: 'Something went wrong!',
+        errorMessage: err.message,
+      });
+      // Programming Error or other unknown error: Don't leak error details
+    } else {
+      // Send a generic message
+      console.error('ERROR 💥', err);
+      res.status(err.statusCode).render('errorTemplate', {
+        title: 'Something went wrong!',
+        errorMessage: 'Please try again later.',
+      });
+    }
   }
 };
 
@@ -89,10 +120,12 @@ module.exports = (err, req, res, next) => {
       'Step 3: In sendErrorForDevelopmentEnviornment 🧑‍💻----------------------------',
     );
 
-    sendErrorForDevelopmentEnviornment(err, res);
+    sendErrorForDevelopmentEnviornment(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     // Step 1: Create Deep Clone of err object
-    let error = JSON.parse(JSON.stringify(err));
+    // let error = JSON.parse(JSON.stringify(err));
+    let error = { ...err };
+    error.message = err.message;
 
     // Making hard copy of err object
     // let error = { ...err };
@@ -127,6 +160,6 @@ module.exports = (err, req, res, next) => {
       error = handleJWTExpiredError(error);
 
     // Call function to send error when in production enviornment
-    sendErrorForProductionEnviornment(error, res);
+    sendErrorForProductionEnviornment(error, req, res);
   }
 };

@@ -1,14 +1,10 @@
 //Start of Requiring MODULES
 // 3d Party Modules
 const express = require('express');
-const multer = require('multer');
 
 // Local Modules
 const authenticationContoller = require('../controllers/authenticationController');
 const userController = require('../controllers/userController');
-
-// MULTER SETTINGS
-const upload = multer({ dest: 'public/img/users' });
 
 // End of Requiring MODULES
 /** STEP TO CREATE ROUTER
@@ -33,7 +29,11 @@ router.use(authenticationContoller.protect);
 
 router.get('/me', userController.getMe, userController.getUser);
 router.patch('/updateMyPassword', authenticationContoller.updatePassword);
-router.patch('/updateMe', upload.single('photo'), userController.updateMe);
+router.patch(
+  '/updateMe',
+  userController.uplodUserPhoto,
+  userController.updateMe,
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 // Users Route:

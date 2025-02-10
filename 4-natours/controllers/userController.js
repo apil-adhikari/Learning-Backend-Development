@@ -1,8 +1,38 @@
+const multer = require('multer');
+
 // Local Modules
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
 const factory = require('./handleFactory');
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/img/users');
+  },
+  filename: (req, file, cb) => {
+    // user-id949038fdf9-543534435.jpeg
+    const imgFileExtension = file.mimetype.split('/')[1];
+    cb(null, `${req.user.id}-${Date.now()}.${imgFileExtension}`);
+  },
+});
+
+// MULTER FILTER
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image. Please upload only images.', 400), false);
+  }
+};
+
+// MULTER SETTINGS
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uplodUserPhoto = upload.single('photo');
 
 // function to filter req.body data to include only name and email
 const filterObj = (obj, ...allowedFields) => {

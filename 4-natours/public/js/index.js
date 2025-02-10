@@ -3,11 +3,13 @@
 import '@babel/polyfill';
 import { login, logout } from './login';
 import { signup } from './signup';
+import { updateData } from './updateSettings';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
 const signupForm = document.querySelector('.form--signup'); // For signup form
 const logoutButton = document.querySelector('.nav__el--logout');
+const userDataForm = document.querySelector('.form-user-data');
 
 // DELEGATION
 // Login Form
@@ -37,4 +39,14 @@ if (signupForm) {
 // Logout Button
 if (logoutButton) {
   logoutButton.addEventListener('click', logout);
+}
+
+// Update Current User Data
+if (userDataForm) {
+  userDataForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    updateData(name, email);
+  });
 }

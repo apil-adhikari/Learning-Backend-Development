@@ -23,6 +23,7 @@ exports.getMe = (req, res, next) => {
 
 // UPDATE user data by LOGGED IN USER(WE DO NOT ALLOW UPDATING PASSWORD FROM THIS).
 exports.updateMe = catchAsyncError(async (req, res, next) => {
+  console.log(req.body);
   /**
    * 1) Create error if user POSTs password data
    * 2) Update user document

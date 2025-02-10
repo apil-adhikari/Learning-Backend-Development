@@ -50,3 +50,9 @@ exports.getSignupForm = (req, res) => {
     title: `GhumGham | Signup`,
   });
 };
+
+exports.getAccount = (req, res) => {
+  res.status(200).render('accountTemplate', {
+    title: `Your account`,
+  });
+};

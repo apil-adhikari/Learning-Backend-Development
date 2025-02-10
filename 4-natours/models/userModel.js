@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema({
   },
   photo: {
     type: String,
+    default: 'default.jpg',
     // required: [true, 'Photo URL is required'],
     // trim: true,
     // Regex to insure its an image file (case-insensitive)

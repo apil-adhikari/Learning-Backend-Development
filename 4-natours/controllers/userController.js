@@ -53,8 +53,8 @@ exports.getMe = (req, res, next) => {
 
 // UPDATE user data by LOGGED IN USER(WE DO NOT ALLOW UPDATING PASSWORD FROM THIS).
 exports.updateMe = catchAsyncError(async (req, res, next) => {
-  console.log(req.file);
-  console.log(req.body);
+  // console.log(req.file);
+  // console.log(req.body);
 
   /**
    * 1) Create error if user POSTs password data
@@ -75,6 +75,8 @@ exports.updateMe = catchAsyncError(async (req, res, next) => {
   // Filter our unwanted fields that are not allowed to be udpated. We want only the name and email fileds to be updated.
 
   const filteredBody = filterObj(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
+
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true,

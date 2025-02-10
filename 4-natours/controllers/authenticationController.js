@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsyncError = require('../utils/catchAsyncError');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 // End of MOUDLES
 
@@ -52,21 +52,21 @@ exports.signup = catchAsyncError(async (req, res, next) => {
   // Sanitize and only allow the required fields from the request body
   const { name, email, password, passwordConfirm, role } = req.body;
 
-  // Only allow 'user' or 'guide' roles, default to 'user' if role is not specified or is invalid
-  const sanitizedRole = ['user', 'guide', 'lead-guide', 'admin'].includes(role)
-    ? role
-    : 'user';
+  // // Only allow 'user' or 'guide' roles, default to 'user' if role is not specified or is invalid
+  // const sanitizedRole = ['user', 'guide', 'lead-guide', 'admin'].includes(role)
+  //   ? role
+  //   : 'user';
 
-  // Check if email already exists in the database (duplicate key error handling)
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    return next(
-      new AppError(
-        'Email already exists! Please login or use a different email.',
-        400,
-      ),
-    );
-  }
+  // // Check if email already exists in the database (duplicate key error handling)
+  // const existingUser = await User.findOne({ email });
+  // if (existingUser) {
+  //   return next(
+  //     new AppError(
+  //       'Email already exists! Please login or use a different email.',
+  //       400,
+  //     ),
+  //   );
+  // }
 
   // Create new user with the necessary fields
   const newUser = await User.create({
@@ -75,8 +75,13 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     password,
     passwordConfirm,
     passwordChangedAt: undefined, // Don't allow the client to set this field
-    role: sanitizedRole, // Use the sanitized role value
+    role,
+    // role: sanitizedRole, // Use the sanitized role value
   });
+
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  console.log(url);
+  await new Email(newUser, url).sendWelcome();
 
   // Send token and respond
   createSendToken(newUser, 201, res);
@@ -253,11 +258,11 @@ exports.forgetPassword = catchAsyncError(async (req, res, next) => {
 
   try {
     // console.log('inside try block of forgot password.');
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 minutes)',
-      message,
-    });
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'Your password reset token (valid for 10 minutes)',
+    //   message,
+    // });
 
     // console.log('inside try block of forgot password.');
     res.status(200).json({

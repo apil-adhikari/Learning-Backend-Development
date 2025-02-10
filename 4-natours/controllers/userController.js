@@ -1,4 +1,5 @@
 const multer = require('multer');
+const sharp = require('sharp');
 
 // Local Modules
 const User = require('../models/userModel');
@@ -6,16 +7,18 @@ const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
 const factory = require('./handleFactory');
 
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/img/users');
-  },
-  filename: (req, file, cb) => {
-    // user-id949038fdf9-543534435.jpeg
-    const imgFileExtension = file.mimetype.split('/')[1];
-    cb(null, `${req.user.id}-${Date.now()}.${imgFileExtension}`);
-  },
-});
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     // user-id949038fdf9-543534435.jpeg
+//     const imgFileExtension = file.mimetype.split('/')[1];
+//     cb(null, `${req.user.id}-${Date.now()}.${imgFileExtension}`);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
 
 // MULTER FILTER
 const multerFilter = (req, file, cb) => {
@@ -33,6 +36,20 @@ const upload = multer({
 });
 
 exports.uplodUserPhoto = upload.single('photo');
+
+// RESIZING IMAGE
+exports.resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+  req.file.filename = `${req.user.id}-${Date.now()}.jpeg`;
+
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
 
 // function to filter req.body data to include only name and email
 const filterObj = (obj, ...allowedFields) => {

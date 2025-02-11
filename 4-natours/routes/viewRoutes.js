@@ -36,6 +36,11 @@ router.get(
 
 // GET ACCOUNT DETAILS
 router.get('/me', authenticationController.protect, viewsController.getAccount); // Protected routed(only logged in user will have access to this route.)
+router.get(
+  '/my-tours',
+  authenticationController.protect,
+  viewsController.getMyTours,
+);
 
 router.post(
   '/submit-user-data',

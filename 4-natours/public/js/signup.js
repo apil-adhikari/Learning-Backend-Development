@@ -13,7 +13,7 @@ export const signup = async (
   console.log('SIGNUP');
   console.log(name, email, photo, role, password, passwordConfirm);
   try {
-    const result = await axios({
+    const res = await axios({
       method: 'POST',
       url: 'http://127.0.0.1:8000/api/v1/users/signup',
       data: {
@@ -26,13 +26,13 @@ export const signup = async (
       },
     });
 
-    if (result.data.status === 'success') {
+    if (res.data.status === 'success') {
       showAlert('success', 'Account created successfully! 🎉');
       window.setTimeout(() => {
         location.assign('/'); // Redirect to home after signup
       }, 3000);
     }
-    console.log(result);
+    console.log(res);
   } catch (error) {
     console.log(error);
     showAlert(

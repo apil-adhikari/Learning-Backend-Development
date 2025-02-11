@@ -15,6 +15,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
@@ -44,30 +45,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 // HELMET Middleware to set security headers in our express app. This should be kept at at the top
 // app.use(helmet());
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          'https://cdn.jsdelivr.net',
-          "'unsafe-inline'",
-          "'unsafe-eval'",
-        ],
-        styleSrc: ["'self'", 'https://fonts.googleapis.com'],
-        imgSrc: ["'self'", 'data:'],
-        connectSrc: [
-          "'self'",
-          'https://cdn.jsdelivr.net',
-          'ws://127.0.0.1:*', // ✅ Allows WebSocket connections
-          'wss://127.0.0.1:*', // ✅ Secure WebSocket (optional)
-        ],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      },
-    },
-  }),
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         scriptSrc: [
+//           "'self'",
+//           'https://cdn.jsdelivr.net',
+//           "'unsafe-inline'",
+//           "'unsafe-eval'",
+//         ],
+//         styleSrc: ["'self'", 'https://fonts.googleapis.com'],
+//         imgSrc: ["'self'", 'data:'],
+//         connectSrc: [
+//           "'self'",
+//           'https://cdn.jsdelivr.net',
+//           'ws://127.0.0.1:*', // ✅ Allows WebSocket connections
+//           'wss://127.0.0.1:*', // ✅ Secure WebSocket (optional)
+//         ],
+//         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+//       },
+//     },
+//   }),
+// );
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {
@@ -175,6 +176,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 /** Handling UNHANDLED ROUTE
  * PROBLEM: How to implement route handler for a route that was not catched by any other rotue handler in our app?

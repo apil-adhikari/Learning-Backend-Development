@@ -1,6 +1,7 @@
 const express = require('express');
 const viewsController = require('../controllers/viewsController');
 const authenticationController = require('../controllers/authenticationController');
+const bookingController = require('../controllers/bookingController');
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.get(
 // GET TOURS OVERVIEW PAGE
 router.get(
   '/',
+  bookingController.createBookingCheckout,
   authenticationController.isLoggedIn,
   viewsController.getOverview,
 );

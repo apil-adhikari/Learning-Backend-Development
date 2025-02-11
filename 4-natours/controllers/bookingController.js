@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel');
 const catchAsyncError = require('../utils/catchAsyncError');
 
 exports.getCheckoutSession = catchAsyncError(async (req, res, next) => {
@@ -20,7 +21,7 @@ exports.getCheckoutSession = catchAsyncError(async (req, res, next) => {
           product_data: {
             name: `${tour.name} Tour`,
             description: `${tour.summary}`, // The description of the tour
-            images: [`https://natours.dev/img/tours/tour-2-cover.jpg`], // Image URL
+            images: [`https://picsum.photos/2000/1333`], // Image URL
           },
           unit_amount: Math.round(tour.price * 100), // Amount in cents
         },
@@ -28,7 +29,7 @@ exports.getCheckoutSession = catchAsyncError(async (req, res, next) => {
       },
     ],
     mode: 'payment', // Defines the checkout mode as a one-time payment
-    success_url: `${req.protocol}://${req.get('host')}/`, // URL after successful payment
+    success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`, // URL after successful payment
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`, // URL if the user cancels
     customer_email: req.user.email, // Customer's email
     client_reference_id: req.params.tourId, // Custom reference to identify the tour
@@ -41,4 +42,18 @@ exports.getCheckoutSession = catchAsyncError(async (req, res, next) => {
     status: 'success',
     session,
   });
+});
+
+exports.createBookingCheckout = catchAsyncError(async (req, res, next) => {
+  // This is temporary because it is unsecure: every one can make booking without paying
+  const { tour, user, price } = req.query; // Data from query string
+  if (!tour && !user && !price) return next();
+
+  await Booking.create({
+    tour,
+    user,
+    price,
+  });
+
+  res.redirect(req.originalUrl.split('?')[0]);
 });

@@ -127,7 +127,7 @@ app.use((req, res, next) => {
 //     // .send() method only sends string back to the client. We can also send json data back to the client.
 //     .json({
 //       message: 'Hello from the server side.',
-//       application: 'Natours',
+//       application: 'GhumGham',
 //     });
 //   // .send('Hello from the server side.');
 // });

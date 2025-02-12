@@ -30,6 +30,7 @@ router.get(
 // GET A TOUR
 router.get(
   '/tour/:slug',
+  authenticationController.protect,
   authenticationController.isLoggedIn,
   viewsController.getTour,
 );

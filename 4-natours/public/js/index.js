@@ -5,6 +5,7 @@ import { login, logout } from './login';
 import { signup } from './signup';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
+import { submitReview, updateReview, deleteReview } from './review';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -13,6 +14,11 @@ const logoutButton = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookButton = document.getElementById('book-tour');
+
+const reviewForm = document.querySelector('#review-form');
+const submitBtn = document.querySelector('#submit-review');
+const updateBtn = document.querySelector('#update-review');
+const deleteBtn = document.querySelector('#delete-review');
 
 // DELEGATION
 // Login Form
@@ -85,5 +91,56 @@ if (bookButton) {
     e.target.textContent = 'Processing...';
     const { tourId } = e.target.dataset;
     bookTour(tourId);
+  });
+}
+
+// if (reviewForm) {
+//   reviewForm.addEventListener('submit', async (e) => {
+//     e.preventDefault();
+
+//     const tourId = reviewForm.dataset.tourId;
+//     const review = document.querySelector('#review-text').value;
+//     const rating = document.querySelector('#review-rating').value;
+
+//     // call the function in review.js
+//     submitReview(tourId, review, rating);
+//   });
+// }
+
+if (reviewForm) {
+  reviewForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tourId = reviewForm.dataset.tourId;
+    const review = document.getElementById('review-text').value;
+    const rating = document.getElementById('review-rating').value;
+
+    // Determine which button was clicked
+    if (e.submitter.id === 'submit-review') {
+      await submitReview(tourId, review, rating);
+    } else if (e.submitter.id === 'update-review') {
+      const reviewId = e.submitter.dataset.reviewId;
+      await updateReview(reviewId, review, rating);
+    }
+  });
+}
+
+if (updateBtn) {
+  updateBtn.addEventListener('click', async () => {
+    const reviewId = updateBtn.dataset.reviewId;
+    console.log(reviewId);
+    const review = document.querySelector('#review-text').value;
+    const rating = document.querySelector('#review-rating').value;
+
+    updateReview(reviewId, review, rating);
+  });
+}
+
+if (deleteBtn) {
+  deleteBtn.addEventListener('click', async () => {
+    const reviewId = deleteBtn.dataset.reviewId;
+    console.log('REVIEW ID IN DELETE BUTTON', reviewId);
+
+    // call the function in review.js
+    deleteReview(reviewId);
   });
 }

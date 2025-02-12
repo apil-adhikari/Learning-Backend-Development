@@ -3,7 +3,7 @@ extends base
 block append head
   //- link(href='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css' rel='stylesheet')
   script(src='https://js.stripe.com/v2/')
-    
+
 mixin reviewCard(review)
   .reviews__card
     .reviews__avatar
@@ -84,6 +84,32 @@ block content
     .reviews
       each review in tour.reviews
         +reviewCard(review)
+
+    if hasBookedTour
+      main.main
+        .form.login-form
+          h3.heading-secondary.ma-bt-lg Leave a Review
+
+          form.form#review-form(data-tour-id=tour._id)
+            .form__group.ma-bt-lg
+              label.form__label Your review:
+              textarea#review-text.form__input(placeholder='Write your review here...', required)= userReview ? userReview.review : ''
+
+            .form__group.ma-bt-lg
+              label.form__label Rating:
+              select#review-rating.form__input
+                - for (let i = 1; i <= 5; i++)
+                  option(value=i selected=(userReview && userReview.rating == i))= i
+
+            if userReview
+              button.btn.btn--red#delete-review(data-review-id=`${userReview._id}`) Delete Review
+              button.btn.btn--green#update-review(data-review-id=`${userReview._id}`) Update Review
+            else
+              .form__group
+                button.btn.btn--green#submit-review Submit Review
+    else
+      p.heading-secondary(style='color: white;') You need to book this tour before leaving a review.
+
 
   section.section-cta
     .cta

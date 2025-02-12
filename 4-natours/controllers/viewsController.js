@@ -21,20 +21,67 @@ exports.getTour = catchAsyncError(async (req, res, next) => {
   // 1) Get the data, for hte requested tour including reviews and tour guides
   const tour = await Tour.findOne({ slug: req.params.slug }).populate({
     path: 'reviews',
-    fields: 'review rating user',
+    options: { sort: { createdAt: -1 } },
+    fields: '_id review rating user',
   });
+
+  console.log('Protecte Route LOGGED IN USER DATA:', req.user);
+  console.log('tour.reviews valuse\n: ', tour.reviews);
+
+  // console.log(
+  //   `Currently OPENED Tour ID:${tour.id} Tour Name: ${tour.name} TOUR INFO: ${tour} `,
+  // );
+
+  // console.log('In viewController | getTour', req.user);
 
   // WE SHOULD CHECK IF WE HAVE TOUR OR NOT WHILE DISPLAYING EACH TOUR
   if (!tour) {
-    return next(new AppError('There is no tour with that name fdfdf!', 404));
+    return next(new AppError('There is no tour with that name!', 404));
+  }
+
+  // CHECK IF THE USER HAS ALREADY BOOKED THIS TOUR
+  let hasBookedTour = false;
+  let userReview = null;
+  console.log('req.user._id', req.user._id);
+
+  if (req.user) {
+    const bookings = await Booking.find({ user: req.user.id }); // IF bookings EXISTS, IT MEANS THERE IS A BOOKING FOR THAT TOUR BY THE LOGGED IN USER.
+    console.log('req.user.id', req.user.id);
+
+    const bookedTourIds = bookings.map((booking) => booking.tour.id);
+    console.log(
+      '----Tour IDs Booked by user(bookedTourIds) ----\n',
+      bookedTourIds,
+    );
+    // console.log(typeof tour.id);
+
+    hasBookedTour = bookedTourIds.includes(tour.id.toString());
+
+    // Improved user review finding:
+    userReview = tour.reviews.find((review) => {
+      if (review.user && review.user._id) {
+        // Check if user and _id exist
+        return review.user._id.toString() === req.user._id.toString();
+      }
+      return false; // Handle cases where review.user or review.user._id might be null/undefined
+    });
+
+    console.log('User review in viewsController:getTour', userReview);
+
+    console.log(
+      'Tour has been booked or not (true : booked | false : note booked):',
+      hasBookedTour,
+    );
   }
 
   // 2) Buld the template
   // 3) Render the template from the data we got for step 1
 
   res.status(200).render('tour', {
-    title: `GhumGham | ${tour.name} Tour`,
+    title: `${tour.name} Tour`,
     tour,
+    hasBookedTour,
+    userReview,
   });
 });
 
@@ -62,11 +109,13 @@ exports.getAccount = (req, res) => {
 // My Bookings
 exports.getMyTours = catchAsyncError(async (req, res, next) => {
   // 1) Find all bookings
-  const bookings = await Booking.find({ user: req.user.id });
+  const bookings = await Booking.find({ user: req.user.id }).sort({
+    createdAt: -1,
+  });
 
   // 2) ?Find the tours with the returned IDs
   const tourIds = bookings.map((el) => el.tour.id);
-  const tours = await Tour.find({
+  let tours = await Tour.find({
     _id: {
       $in: tourIds,
     },

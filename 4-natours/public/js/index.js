@@ -37,11 +37,9 @@ if (signupForm) {
     e.preventDefault();
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
-    const photo = document.getElementById('photo').value;
-    const role = document.getElementById('role').value;
     const password = document.getElementById('password').value;
     const passwordConfirm = document.getElementById('passwordConfirm').value;
-    signup(name, email, photo, role, password, passwordConfirm);
+    signup(name, email, password, passwordConfirm);
   });
 }
 

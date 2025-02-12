@@ -2,16 +2,9 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
 
-export const signup = async (
-  name,
-  email,
-  photo,
-  role,
-  password,
-  passwordConfirm,
-) => {
+export const signup = async (name, email, password, passwordConfirm) => {
   console.log('SIGNUP');
-  console.log(name, email, photo, role, password, passwordConfirm);
+  console.log(name, email, password, passwordConfirm);
   try {
     const res = await axios({
       method: 'POST',
@@ -19,8 +12,7 @@ export const signup = async (
       data: {
         name,
         email,
-        photo,
-        role,
+
         password,
         passwordConfirm,
       },

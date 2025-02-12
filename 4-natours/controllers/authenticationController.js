@@ -75,7 +75,7 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     password,
     passwordConfirm,
     passwordChangedAt: undefined, // Don't allow the client to set this field
-    role,
+
     // role: sanitizedRole, // Use the sanitized role value
   });
 

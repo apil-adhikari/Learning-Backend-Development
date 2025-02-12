@@ -14,18 +14,6 @@ block content
           input#email.form__input(type='email', placeholder='you@example.com', required)
 
         .form__group
-          label.form__label(for='photo') Profile Photo (URL)
-          input#photo.form__input(type='text', placeholder='https://example.com/photo.jpg')
-
-        .form__group
-          label.form__label(for='role') Role
-          select#role.form__input
-            option(value='user' selected) User
-            option(value='guide') Guide
-            option(value='lead-guide') Lead Guide
-            option(value='admin') Admin
-
-        .form__group
           label.form__label(for='password') Password
           input#password.form__input(type='password', placeholder='••••••••', required, minlength='8', maxlength='128')
 

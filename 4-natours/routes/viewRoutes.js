@@ -43,6 +43,13 @@ router.get(
   viewsController.getMyTours,
 );
 
+// ROUTE FOR /MY REVIEWS
+router.get(
+  '/my-reviews',
+  authenticationController.protect,
+  viewsController.geMyReviews,
+);
+
 router.post(
   '/submit-user-data',
   authenticationController.protect,

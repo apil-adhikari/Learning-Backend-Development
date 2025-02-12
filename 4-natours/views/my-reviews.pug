@@ -1,0 +1,31 @@
+extends base
+
+block append head
+  link(rel='stylesheet', href='/css/my-reviews.css')
+
+block content
+  main.main
+    h2.heading-secondary.ma-bt-lg My Reviews
+
+    table.reviews-table
+      thead
+        tr
+          th Tour
+          th Review
+          th Rating
+          th Actions
+      tbody
+        each review in reviews
+          tr
+            td.tour-cell
+              a.tour-link(href=`/tour/${review.tour.slug}`)
+                img.tour-image(src=`/img/tours/${review.tour.imageCover}`, alt=`${review.tour.name}`)
+                span.tour-name= review.tour.name
+            td.review-cell= review.review
+            td.rating-cell
+              .rating-stars
+                - for (let i = 1; i <= 5; i++)
+                  svg.rating-star(class= i <= review.rating ? 'rating-star--active' : '')
+                    use(xlink:href='/img/icons.svg#icon-star')
+            td.actions-cell
+              p Please use /tour to update or delete the review.

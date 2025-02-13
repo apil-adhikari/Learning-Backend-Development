@@ -1,7 +1,6 @@
 extends base 
 
 block append head
-  //- link(href='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css' rel='stylesheet')
   script(src='https://js.stripe.com/v2/')
 
 mixin reviewCard(review)
@@ -85,7 +84,7 @@ block content
       each review in tour.reviews
         +reviewCard(review)
 
-    if hasBookedTour
+    if hasBookedTour && user.role !== 'admin'
       main.main
         .form.login-form
           h3.heading-secondary.ma-bt-lg Leave a Review
@@ -107,9 +106,10 @@ block content
             else
               .form__group
                 button.btn.btn--green#submit-review Submit Review
+    else if user.role === 'admin'
+      p.heading-secondary(style='color:rgba(255, 0, 0, 0.45); margin-left: 10rem; margin-top: 5rem; margin-bottom: 0;') Admins are not allowed to post reviews.
     else
       p.heading-secondary(style='color: white;') You need to book this tour before leaving a review.
-
 
   section.section-cta
     .cta
@@ -122,10 +122,6 @@ block content
         p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
 
         if user
-          //- button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
           button.btn.btn--green.span-all-rows#book-tour(data-tour-id=tour._id) Book tour now!
         else
           a.btn.btn--green.span-all-rows(href='/login') Log in to book tour
-
-    //- script(src='https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js')
-    //- script(src='/js/gomaps.js')

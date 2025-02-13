@@ -162,3 +162,28 @@ exports.updateUserData = catchAsyncError(async (req, res, next) => {
     user: updatedUser,
   });
 });
+
+// ADMIN ACCESS
+exports.getManageTours = catchAsyncError(async (req, res, next) => {
+  // Fetching tours with populated guide information
+  const tours = await Tour.find()
+    .sort({ createdAt: -1 })
+    .select(
+      'imageCover name startLocation duration difficulty ratingsAverage ratingsQuantity price summary createdAt startDates maxGroupSize slug',
+    )
+    .populate('guides', 'name');
+
+  // Calculating the number of users who have booked each tour
+  const toursWithBookings = await Promise.all(
+    tours.map(async (tour) => {
+      const bookingsCount = await Booking.countDocuments({ tour: tour._id });
+      return { ...tour._doc, bookingsCount }; // Add bookingsCount to the tour data
+    }),
+  );
+
+  // Rendering the page with the tours data, including bookings count
+  res.status(200).render('manageTours', {
+    title: 'Manage Tours',
+    tours: toursWithBookings, // Pass toursWithBookings instead of tours
+  });
+});

@@ -1,0 +1,46 @@
+extends base
+
+block content
+  h1 Manage Tours
+
+  table(style='border-collapse: collapse; width: 100%; border: 1px solid green;')
+    thead
+      tr
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Cover Image
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Tour Name
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Location
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Duration (Days)
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Difficulty
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Ratings
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Price
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Summary
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Created At
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Start Dates
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Max Group Size
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') No. of Bookings
+        th(style='font-family: Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Actions
+    tbody
+      each tour in tours
+        tr
+          td(style='border: 1px solid green; text-align: center;')
+            img(src=`/img/tours/${tour.imageCover}`, alt='Cover Image', width='50', height='50')
+          td(style='border: 1px solid green; text-align: center; font-size: 16px;')= tour.name
+          td(style='border: 1px solid green; text-align: center;')= tour.startLocation ? tour.startLocation.address : 'N/A'
+          td(style='border: 1px solid green; text-align: center;')= `${tour.duration} days`
+          td(style='border: 1px solid green; text-align: center;')= tour.difficulty
+          td(style='border: 1px solid green; text-align: center;')
+            span= tour.ratingsAverage
+            span (#{tour.ratingsQuantity} ratings)
+          td(style='border: 1px solid green; text-align: center;')= `$${tour.price}`
+          td(style='border: 1px solid green; text-align: center;')= tour.summary
+          td(style='border: 1px solid green; text-align: center;')= tour.createdAt.toLocaleDateString()
+          td(style='border: 1px solid green; text-align: center;')
+            each date in tour.startDates
+              p= date.toLocaleDateString()
+          td(style='border: 1px solid green; text-align: center;')= tour.maxGroupSize
+          td(style='border: 1px solid green; text-align: center;')= tour.bookingsCount || 0
+          td(style='border: 1px solid green; text-align: center;')
+            a(href=`/tour/${tour.slug}`, class='btn btn-green') View
+            a(href=`/admin/tour/edit/${tour._id}`, class='btn btn-small:link') Edit
+            form(action=`/admin/tour/delete/${tour._id}`, method='POST', style='display:inline')
+              button(type='submit', class='btn btn-danger') Delete

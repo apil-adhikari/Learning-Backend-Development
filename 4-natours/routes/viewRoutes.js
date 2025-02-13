@@ -56,4 +56,17 @@ router.post(
   viewsController.updateUserData,
 );
 
+// ADMIN ACCESS ROUTES
+// router.use(authenticationController.protect);
+// router.use(authenticationController.restrictTo('admin'));
+
+router.get(
+  '/manage-tours',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getManageTours,
+);
+
+// END OF ADMIN ACCESS ROUTES
+
 module.exports = router;

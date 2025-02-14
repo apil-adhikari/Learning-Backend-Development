@@ -6,6 +6,7 @@ import { signup } from './signup';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { submitReview, updateReview, deleteReview } from './review';
+import { addTour } from './tour';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -14,13 +15,14 @@ const logoutButton = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookButton = document.getElementById('book-tour');
-
 const reviewForm = document.querySelector('#review-form');
 const submitBtn = document.querySelector('#submit-review');
 const updateBtn = document.querySelector('#update-review');
 const deleteBtn = document.querySelector('#delete-review');
+const addTourForm = document.querySelector('.form--add-tour'); // SELECTING THE FORM IN addTour pug template
 
 // DELEGATION
+
 // Login Form
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
@@ -57,9 +59,6 @@ if (userDataForm) {
     form.append('email', document.getElementById('email').value);
     form.append('photo', document.getElementById('photo').files[0]);
     console.log(form);
-
-    // const name = document.getElementById('name').value;
-    // const email = document.getElementById('email').value;
     updateSettings(form, 'data');
   });
 }
@@ -67,12 +66,10 @@ if (userDataForm) {
 if (userPasswordForm) {
   userPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     document.querySelector('.btn--save-password').textContent = 'Updating...';
     const passwordCurrent = document.getElementById('password-current').value;
     const password = document.getElementById('password').value;
     const passwordConfirm = document.getElementById('password-confirm').value;
-
     await updateSettings(
       { passwordCurrent, password, passwordConfirm },
       'password',
@@ -92,19 +89,7 @@ if (bookButton) {
   });
 }
 
-// if (reviewForm) {
-//   reviewForm.addEventListener('submit', async (e) => {
-//     e.preventDefault();
-
-//     const tourId = reviewForm.dataset.tourId;
-//     const review = document.querySelector('#review-text').value;
-//     const rating = document.querySelector('#review-rating').value;
-
-//     // call the function in review.js
-//     submitReview(tourId, review, rating);
-//   });
-// }
-
+// Review Form Submission
 if (reviewForm) {
   reviewForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -128,7 +113,6 @@ if (updateBtn) {
     console.log(reviewId);
     const review = document.querySelector('#review-text').value;
     const rating = document.querySelector('#review-rating').value;
-
     updateReview(reviewId, review, rating);
   });
 }
@@ -137,8 +121,17 @@ if (deleteBtn) {
   deleteBtn.addEventListener('click', async () => {
     const reviewId = deleteBtn.dataset.reviewId;
     console.log('REVIEW ID IN DELETE BUTTON', reviewId);
-
-    // call the function in review.js
     deleteReview(reviewId);
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const addTourForm = document.querySelector('.form--add-tour'); // SELECTING THE FORM IN addTour.pug template
+
+  if (addTourForm) {
+    addTourForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await addTour(addTourForm); // Call the addTour function from tour.js
+    });
+  }
+});

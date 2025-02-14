@@ -187,3 +187,27 @@ exports.getManageTours = catchAsyncError(async (req, res, next) => {
     tours: toursWithBookings, // Pass toursWithBookings instead of tours
   });
 });
+
+// ADD TOUR
+exports.getAddTourPage = catchAsyncError(async (req, res, next) => {
+  // Fetch all users with roles 'guide' or 'lead-guide'
+  const guides = await User.find({
+    role: { $in: ['guide', 'lead-guide'] },
+  }).select('_id name role');
+
+  // Check if we are editing an existing tour
+  let tour = null;
+  if (req.params.id) {
+    tour = await Tour.findById(req.params.id).populate('guides');
+    if (!tour) {
+      return next(new AppError('No tour found with that ID', 404));
+    }
+  }
+
+  // Render the form page with the list of guides and tour data (if editing)
+  res.status(200).render('addTour', {
+    title: tour ? 'Edit Tour' : 'Add Tour',
+    guides, // Pass the guides data to the template
+    tour, // Pass the tour data if editing, otherwise null
+  });
+});

@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const multer = require('multer');
 const sharp = require('sharp');
 
@@ -66,6 +69,44 @@ exports.resizeTourImages = async (req, res, next) => {
 
   // console.log(req.body);
   next();
+};
+
+exports.renameTourImages = async (req, res, next) => {
+  try {
+    if (req.body.imageCover) {
+      const newImageCoverName = `tour-${req.params.id}-cover.jpeg`;
+      const oldImageCoverPath = path.join(
+        'public/img/tours',
+        req.body.imageCover,
+      );
+      const newImageCoverPath = path.join(
+        'public/img/tours',
+        newImageCoverName,
+      );
+
+      // Rename the cover image
+      fs.renameSync(oldImageCoverPath, newImageCoverPath);
+      req.body.imageCover = newImageCoverName;
+    }
+
+    if (req.body.images && req.body.images.length > 0) {
+      await Promise.all(
+        req.body.images.map(async (filename, index) => {
+          const newImageName = `tour-${req.params.id}-${index + 1}.jpeg`;
+          const oldImagePath = path.join('public/img/tours', filename);
+          const newImagePath = path.join('public/img/tours', newImageName);
+
+          // Rename the other images
+          fs.renameSync(oldImagePath, newImagePath);
+          req.body.images[index] = newImageName;
+        }),
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(new AppError('Error renaming images. Please try again.', 500));
+  }
 };
 
 // upload.single('image'); req.file

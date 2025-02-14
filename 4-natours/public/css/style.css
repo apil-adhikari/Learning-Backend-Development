@@ -30,7 +30,7 @@ html {
 body {
   line-height: 1.6;
   font-weight: 300;
-  font-family: 'Rubik', sans-serif;
+  font-family:  'Rubik', sans-serif;
   color: #777;
   padding: 3rem;
   min-height: 100vh;
@@ -187,6 +187,7 @@ body {
 .btn:link,
 .btn:visited {
   font-size: 1.6rem;
+  font-family: 'Source Code Pro';
   padding: 1.4rem 3rem;
   border-radius: 10rem;
   text-transform: uppercase;
@@ -236,6 +237,14 @@ body {
 }
 .btn--green::after {
   background-color: #55c57a;
+}
+
+.btn--red {
+  background-color: red;
+  color: #fff;
+}
+.btn--red::after {
+  background-color: red;
 }
 
 .btn--small {
@@ -1221,7 +1230,9 @@ body {
   margin: 0 auto;
 }
 
-.login-form {
+.login-form,
+.signup-from,
+.tour-form {
   margin: 0 auto;
   max-width: 55rem;
   background-color: #fff;
@@ -1302,12 +1313,12 @@ body {
 }
 
 .form__upload {
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
+  /* width: 0.1px;
+  height: 0.1px; */
+  /* opacity: 0; */
   overflow: hidden;
-  position: absolute;
-  z-index: -1;
+  /* position: absolute; */
+  /* z-index: -1; */
 }
 
 .form__upload:focus + label {

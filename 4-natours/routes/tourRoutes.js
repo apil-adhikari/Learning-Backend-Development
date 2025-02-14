@@ -49,14 +49,14 @@ router
 
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
 
-router
-  .route('/')
-  .get(tourController.getAllTours)
-  .post(
-    authenticationController.protect,
-    authenticationController.restrictTo('admin', 'lead-guide'),
-    tourController.createTour,
-  );
+router.route('/').get(tourController.getAllTours).post(
+  authenticationController.protect,
+  authenticationController.restrictTo('admin', 'lead-guide'),
+  // tourController.uploadTourImages,
+  // tourController.resizeTourImages,
+  tourController.createTour,
+  // tourController.renameTourImages,
+);
 router
   .route('/:id')
   .get(authenticationController.protect, tourController.getTour)

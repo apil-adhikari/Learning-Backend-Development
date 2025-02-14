@@ -67,6 +67,13 @@ router.get(
   viewsController.getManageTours,
 );
 
+router.get(
+  '/add-tour',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getAddTourPage,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

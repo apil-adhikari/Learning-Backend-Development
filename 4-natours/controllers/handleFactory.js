@@ -41,7 +41,9 @@ exports.updateOne = (Model) =>
 
 exports.createOne = (Model) =>
   catchAsyncError(async (req, res, next) => {
+    console.log('IN CREATE TOUR\n', req.body);
     const newDocument = await Model.create(req.body);
+    console.log(newDocument);
 
     res.status(201).json({
       status: 'success',

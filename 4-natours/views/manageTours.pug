@@ -43,6 +43,6 @@ block content
           td(style='border: 1px solid green; text-align: center;')= tour.bookingsCount || 0
           td(style='border: 1px solid green; text-align: center; display: flex; gap: 0.5rem; justify-content: center;')
             a(href=`/tour/${tour.slug}`, class='btn btn--white') View
-            a(href=`/admin/tour/edit/${tour._id}`, class='btn btn--green btn--small') Edit
+            a(href=`/update-tour/${tour._id}`, class='btn btn--green btn--small') Edit
             form(action=`/admin/tour/delete/${tour._id}`, method='POST', style='display:inline')
               button(type='submit', class='btn btn--red btn--small') Delete

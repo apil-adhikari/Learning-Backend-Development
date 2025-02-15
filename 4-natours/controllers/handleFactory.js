@@ -22,6 +22,8 @@ exports.deleteOne = (Model) =>
 
 exports.updateOne = (Model) =>
   catchAsyncError(async (req, res, next) => {
+    console.log('In handleFactory.updateOne(): req.params.id', req.params.id);
+    console.log('In handleFactory.updateOne(): req.body', req.body);
     const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,

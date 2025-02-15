@@ -211,3 +211,31 @@ exports.getAddTourPage = catchAsyncError(async (req, res, next) => {
     tour, // Pass the tour data if editing, otherwise null
   });
 });
+
+exports.getUpdateTourPage = catchAsyncError(async (req, res, next) => {
+  const tour = await Tour.findById(req.params.id).populate({
+    path: 'guides',
+    select: '_id name role',
+  });
+
+  if (!tour) {
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
+  console.log(
+    'In viewsController.getUpdateTourPage, the tour selected is: ',
+    tour,
+  );
+
+  const availiableGuides = await User.find({
+    role: { $in: ['lead-guide', 'guide'] },
+  }).select('name role _id');
+
+  console.log('Availiable guides: ', availiableGuides);
+
+  res.status(200).render('updateTour', {
+    title: 'Update tour',
+    tour,
+    availiableGuides: availiableGuides || [],
+  });
+});

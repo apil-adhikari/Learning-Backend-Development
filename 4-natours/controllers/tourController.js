@@ -1,138 +1,100 @@
-const fs = require('fs');
-const path = require('path');
-
 const multer = require('multer');
 const sharp = require('sharp');
 
 const Tour = require('../models/tourModel');
-// const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
 const factory = require('./handleFactory');
 
 const multerStorage = multer.memoryStorage();
 
-// MULTER FILTER
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
   } else {
-    cb(new AppError('Not an image. Please upload only images.', 400), false);
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
   }
 };
 
-// MULTER SETTINGS
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
 });
 
 exports.uploadTourImages = upload.fields([
-  {
-    name: 'imageCover',
-    maxCount: 1,
-  },
-  {
-    name: 'images',
-    maxCount: 4,
-  },
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
 ]);
 
-exports.resizeTourImages = async (req, res, next) => {
-  if (!req.files.imageCover || !req.files.images) next();
+exports.resizeTourImages = catchAsyncError(async (req, res, next) => {
+  console.log(req.files); // Debugging step
+  console.log(req.body); // Debugging step
+  if (!req.files.imageCover && !req.files.images) return next();
 
-  // 1) PROCESS COVER IMAGE
-  // const imageCoverFileName = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
-  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
-  await sharp(req.files.imageCover[0].buffer)
-    .resize(2000, 1333) // 3:2 ratio
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/img/tours/${req.body.imageCover}`);
-
-  // 2) OTHER IMAGES
-  req.body.images = [];
-
-  await Promise.all(
-    req.files.images.map(async (file, index) => {
-      const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpeg`;
-
-      await sharp(file.buffer)
-        .resize(2000, 1333) // 3:2 ratio
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`public/img/tours/${filename}`);
-
-      req.body.images.push(filename);
-    }),
-  );
-
-  // console.log(req.body);
-  next();
-};
-
-exports.renameTourImages = async (req, res, next) => {
-  try {
-    if (req.body.imageCover) {
-      const newImageCoverName = `tour-${req.params.id}-cover.jpeg`;
-      const oldImageCoverPath = path.join(
-        'public/img/tours',
-        req.body.imageCover,
-      );
-      const newImageCoverPath = path.join(
-        'public/img/tours',
-        newImageCoverName,
-      );
-
-      // Rename the cover image
-      fs.renameSync(oldImageCoverPath, newImageCoverPath);
-      req.body.imageCover = newImageCoverName;
-    }
-
-    if (req.body.images && req.body.images.length > 0) {
-      await Promise.all(
-        req.body.images.map(async (filename, index) => {
-          const newImageName = `tour-${req.params.id}-${index + 1}.jpeg`;
-          const oldImagePath = path.join('public/img/tours', filename);
-          const newImagePath = path.join('public/img/tours', newImageName);
-
-          // Rename the other images
-          fs.renameSync(oldImagePath, newImagePath);
-          req.body.images[index] = newImageName;
-        }),
-      );
-    }
-
-    next();
-  } catch (error) {
-    next(new AppError('Error renaming images. Please try again.', 500));
+  // 1) Cover image
+  if (req.files.imageCover) {
+    req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${req.body.imageCover}`);
   }
-};
 
-// upload.single('image'); req.file
-// upload.array('images'); req.files
+  // 2) Images
+  if (req.files.images) {
+    req.body.images = [];
 
-//NOTE: Reading FILE from file based API
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-// );
+    await Promise.all(
+      req.files.images.map(async (file, i) => {
+        const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
 
-/**
- * Create a checkBody Middleware
- * Check if body contains the name and price property
- * If not, send back 400 (bad request) Add it to post handler stack
- */
-// exports.checkBody = (req, res, next) => {
-//   const name = req.body.name;
-//   const price = req.body.price;
-//   if (!name || !price) {
-//     return res.status(400).json({
-//       status: 'fail',
-//       message: 'Invalid request from the client. Missing name or price',
-//     });
-//   }
-//   next();
-// };
+        await sharp(file.buffer)
+          .resize(2000, 1333)
+          .toFormat('jpeg')
+          .jpeg({ quality: 90 })
+          .toFile(`public/img/tours/${filename}`);
+
+        req.body.images.push(filename);
+      }),
+    );
+  }
+
+  next();
+});
+
+exports.updateTour = catchAsyncError(async (req, res, next) => {
+  // Parse the JSON data from the formData
+  if (req.body.jsonData) {
+    const jsonData = JSON.parse(req.body.jsonData);
+
+    // Ensure the coordinates are in the correct format
+    if (jsonData.startLocation && jsonData.startLocation.coordinates) {
+      jsonData.startLocation.coordinates =
+        jsonData.startLocation.coordinates.map(Number);
+      jsonData.startLocation.type = 'Point'; // Add the type field
+    }
+
+    // Ensure each location has the type field
+    if (jsonData.locations) {
+      jsonData.locations = jsonData.locations.map((location) => ({
+        ...location,
+        type: 'Point',
+      }));
+    }
+
+    // Merge the parsed JSON data into req.body
+    req.body = { ...req.body, ...jsonData };
+  }
+
+  // Call the factory function to update the tour
+  factory.updateOne(Tour)(req, res, next);
+});
+
+exports.createTour = factory.createOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+exports.getAllTours = factory.getAll(Tour);
 
 /** Middleware Function to manipulate query string help us to alias top 5 cheap tours
  * This middleware function prefill the parts of the query object before it reaches to getAllTours()
@@ -143,120 +105,6 @@ exports.aliasTopTour = async (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
-
-// GET all tours using factory function
-exports.getAllTours = factory.getAll(Tour);
-
-// exports.getAllTours = catchAsyncError(async (req, res, next) => {
-//   // EXECUTE QUERY
-//   const features = new APIFeatures(Tour.find(), req.query)
-//     .filter()
-//     .sort()
-//     .limitFields()
-//     .paginate();
-//   const tours = await features.query;
-
-//   // SEND RESPONSE
-//   res.status(200).json({
-//     status: 'success',
-//     // Sending no of results we have since its an array we can count the length of that array.
-//     results: `${tours.length} results found`,
-//     // Envolope for our data
-//     data: {
-//       // url's endpoint: send the data that we need to send as response
-//       tours: tours,
-//     },
-//   });
-// });
-
-/** METHOD POST: CREATE a new TOUR
- * 1) Use Tour.create({}) method to create a new data.
- * 2) Create a new tour based on the data that comes from the body of the request. ie req.body
- * 3) .create() method returns a promise so we handle the promise using async-awiat.
- * 4) We accept the data in new variable newTour and this will have newly created tour with upto date id.
- * 5) We also need to handle the error, we can use simple try{} cathc(){} block to handle the error, later use seprate module to handle error for our application.
- */
-
-// Function wrapping async function
-// const catchAsyncError = (fn) => {
-//   return (req, res, next) => {
-//     fn(req, res, next).catch((err) => next(err));
-//   };
-// };
-
-exports.createTour = factory.createOne(Tour);
-// exports.createTour = catchAsyncError(async (req, res, next) => {
-//   const newTour = await Tour.create(req.body);
-
-//   res.status(201).json({
-//     status: 'success',
-//     data: {
-//       tour: newTour,
-//     },
-//   });
-// });
-
-exports.updateTour = factory.updateOne(Tour);
-
-// exports.updateTour = catchAsyncError(async (req, res, next) => {
-//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-//     new: true,
-//     runValidators: true,
-//   });
-
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404));
-//   }
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       tour: tour,
-//     },
-//   });
-// });
-
-exports.deleteTour = factory.deleteOne(Tour);
-
-// exports.deleteTour = catchAsyncError(async (req, res, next) => {
-//   const tour = await Tour.findByIdAndDelete(req.params.id);
-
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404));
-//   }
-
-//   res.status(204).json({
-//     status: 'success',
-//     data: null,
-//   });
-// });
-
-exports.getTour = factory.getOne(Tour, {
-  path: 'reviews',
-});
-
-// exports.getTour = catchAsyncError(async (req, res, next) => {
-//   const tour = await Tour.findById(req.params.id).populate('reviews');
-//   // We can use populate before all query starting with find, so we use query middleware do so
-//   // .populate({
-//   //   path: 'guides',
-//   //   select: '-__v -passwordChangedAt',
-//   // }); // the populate() will fill there reference wehave given with the data but only in the query.
-//   console.log(tour);
-//   // Tour.findOne({_id: req.params.id}) USING FILTER OBJECT & returns only one document
-
-//   // CHECK IF tour EXISTS, If does not, then use AppError class to generate error message and status code.
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404));
-//   }
-
-//   res.status(200).json({
-//     status: 'success',
-//     data: {
-//       tour: tour,
-//     },
-//   });
-// });
 
 /**
  * Handler Function for Aggregation Pipeline (MongoDB Feature)

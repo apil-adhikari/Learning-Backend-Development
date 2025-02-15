@@ -1,0 +1,138 @@
+extends base
+
+block content
+  main.main
+    .update-tour-form
+      h2.heading-secondary.ma-bt-lg Update Tour
+      form.form.form--update-tour(data-tour-id=tour.id enctype="multipart/form-data")
+        // Basic Information
+        .form__group
+          label.form__label(for='name') Tour Name
+          input#name.form__input(
+            type='text',
+            name='name',
+            placeholder='The Sea Explorer',
+            required,
+            minlength='10',
+            maxlength='40',
+            value=tour.name
+          )
+        .form__group
+          label.form__label(for='duration') Duration (days)
+          input#duration.form__input(
+            type='number',
+            name='duration',
+            placeholder='7',
+            required,
+            min='1',
+            value=tour.duration
+          )
+        .form__group
+          label.form__label(for='maxGroupSize') Max Group Size
+          input#maxGroupSize.form__input(
+            type='number',
+            name='maxGroupSize',
+            placeholder='15',
+            required,
+            min='1',
+            value=tour.maxGroupSize
+          )
+        .form__group
+          label.form__label(for='difficulty') Difficulty Level
+          select#difficulty.form__input(name='difficulty', required)
+            option(value='easy', selected=tour.difficulty === 'easy') Easy
+            option(value='medium', selected=tour.difficulty === 'medium') Medium
+            option(value='difficult', selected=tour.difficulty === 'difficult') Difficult
+        .form__group
+          label.form__label(for='price') Price ($)
+          input#price.form__input(
+            type='number',
+            name='price',
+            placeholder='497',
+            required,
+            min='0',
+            value=tour.price
+          )
+        .form__group
+          label.form__label(for='summary') Summary
+          textarea#summary.form__input(
+            name='summary',
+            placeholder='A short description of the tour...',
+            required
+          )= tour.summary
+        .form__group
+          label.form__label(for='description') Detailed Description
+          textarea#description.form__input(
+            name='description',
+            placeholder='Detailed information about the tour...'
+          )= tour.description
+        // Start Location
+        .form__group
+          label.form__label(for='startLocationDescription') Start Location Description
+          input#startLocationDescription.form__input(
+            type='text',
+            name='startLocation[description]',
+            placeholder='Miami, USA',
+            required,
+            value=tour.startLocation.description
+          )
+        .form__group
+          label.form__label(for='startLocationAddress') Start Location Address
+          input#startLocationAddress.form__input(
+            type='text',
+            name='startLocation[address]',
+            placeholder='301 Biscayne Blvd, Miami, FL 33132, USA',
+            required,
+            value=tour.startLocation.address
+          )
+        .form__group
+          label.form__label(for='startLocationCoordinates') Start Location Coordinates
+          input#startLocationCoordinates.form__input(
+            type='text',
+            name='startLocation[coordinates]',
+            placeholder='-80.185942, 25.774772',
+            required,
+            value=tour.startLocation.coordinates.join(', ')
+          )
+        // Start Dates
+        .form__group
+          label.form__label(for='startDates') Start Dates (comma-separated)
+          input#startDates.form__input(
+            type='text',
+            name='startDates',
+            placeholder='2025-06-30, 2025-07-30',
+            required,
+            value=tour.startDates.join(', ')
+          )
+        // Locations
+        .form__group
+          label.form__label(for='locations') Locations (one per line: description|address|lat,lng|day)
+          textarea#locations.form__input(
+            name='locations',
+            placeholder='Lummus Park Beach|Miami Beach, FL|-80.128473,25.781842|1\nIslamorada|Islamorada, FL|-80.647885,24.909047|2',
+            required
+          )= tour.locations.map(location => `${location.description}|${location.address}|${location.coordinates.join(',')}|${location.day}`).join('\n')
+        // Image Cover
+        .form__group
+          label.form__label(for='imageCover') Cover Image
+          input#imageCover.form__input(type='file', name='imageCover', accept='image/*')
+          if tour.imageCover
+            img(src=`/img/tours/${tour.imageCover}`, alt='Cover Image', width='100', height='auto')
+        // Tour Images
+        .form__group
+          label.form__label(for='images') Tour Images (Upload multiple)
+          input#images.form__input(type='file', name='images', accept='image/*', multiple)
+          if tour.images.length > 0
+            ul
+              each image in tour.images
+                li
+                  img(src=`/img/tours/${image}`, alt='Tour Image', width='100', height='auto')
+        // Guides
+        .form__group
+          label.form__label(for='guides') Guides
+          select#guides.form__input(name='guides', multiple required)
+            each guide in availiableGuides
+              option(value=guide._id, selected=tour.guides.some(tourGuide => tourGuide._id.toString() === guide._id.toString()))= guide.name
+        // Submit Button
+        .form__group
+          button.btn.btn--green(type='submit') Update Tour

@@ -177,3 +177,23 @@ export const updateTour = async (form) => {
     );
   }
 };
+
+// Delete Tour(This function is called from manage-tours.pug)
+export const deleteTour = async (tourId) => {
+  try {
+    const response = await axios({
+      method: 'DELETE',
+      url: `/api/v1/tours/${tourId}`,
+    });
+
+    if (response.status === 204) {
+      showAlert('success', 'Tour deleted successfully!');
+      window.setTimeout(() => {
+        location.assign('/manage-tours');
+      }, 1500);
+    }
+  } catch (error) {
+    console.log('ERROR IN deleteTour():', error);
+    showAlert('error', 'Failed to delete tour.');
+  }
+};

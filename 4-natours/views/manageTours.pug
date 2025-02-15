@@ -1,48 +1,49 @@
 extends base
 
 block content
-  .manage-tours-header(style='display: flex; align-items: center; justify-content: space-between; margin: 2rem;')
-    h1 Manage Tours
-    a(href='/add-tour', class='btn btn--green') Add Tour
+  main.main
+    .manage-tours-header(style='display: flex; align-items: center; justify-content: space-between; margin: 2rem;')
+      h1.heading-secondary Manage Tours
+      a(href='/add-tour', class='btn btn--green') Add Tour
 
-  table(style='border-collapse: collapse; width: 100%; border: 1px solid green;')
-    thead
-      tr
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Cover Image
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Tour Name
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Location
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Duration (Days)
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Difficulty
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Ratings
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Price
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Summary
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Created At
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Start Dates
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Max Group Size
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') No. of Bookings
-        th(style='font-family: Source Code Pro, Rubik; color: #ffffff; background-color: #777; border: 1px solid #444; text-align: center;') Actions
-    tbody
-      each tour in tours
-        tr
-          td(style='border: 1px solid green; text-align: center;')
-            img(src=`/img/tours/${tour.imageCover}`, alt='Cover Image', width='50', height='50')
-          td(style='border: 1px solid green; text-align: center; font-size: 16px;')= tour.name
-          td(style='border: 1px solid green; text-align: center;')= tour.startLocation ? tour.startLocation.address : 'N/A'
-          td(style='border: 1px solid green; text-align: center;')= `${tour.duration} days`
-          td(style='border: 1px solid green; text-align: center;')= tour.difficulty
-          td(style='border: 1px solid green; text-align: center;')
-            span= tour.ratingsAverage
-            span (#{tour.ratingsQuantity} ratings)
-          td(style='border: 1px solid green; text-align: center; font-weight:bold;')= `$${tour.price}`
-          td(style='border: 1px solid green; text-align: center;')= tour.summary
-          td(style='border: 1px solid green; text-align: center;')= new Date(tour.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-          td(style='border: 1px solid green; text-align: center;')
-            each date in tour.startDates
-              p= new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-          td(style='border: 1px solid green; text-align: center;')= tour.maxGroupSize
-          td(style='border: 1px solid green; text-align: center;')= tour.bookingsCount || 0
-          td(style='border: 1px solid green; text-align: center; display: flex; gap: 0.5rem; justify-content: center;')
-            a(href=`/tour/${tour.slug}`, class='btn btn--white') View
-            a(href=`/update-tour/${tour._id}`, class='btn btn--green btn--small') Edit
-            form(action=`/admin/tour/delete/${tour._id}`, method='POST', style='display:inline')
-              button(type='submit', class='btn btn--red btn--small') Delete
+    .table-container
+      table.table
+        thead
+          tr
+            th Cover Image
+            th Tour Name
+            th Location
+            th Duration (Days)
+            th Difficulty
+            th Difficulty
+            th Ratings
+            th Price
+            th Summary
+            th Created At
+            th Start Dates
+            th Max Group Size
+            th No. of Bookings
+            th Actions
+        tbody
+          each tour in tours
+            tr
+              td
+                img(src=`/img/tours/${tour.imageCover}`, alt='Cover Image', width='75', height='75')
+              td= tour.name
+              td= tour.startLocation ? tour.startLocation.address : 'N/A'
+              td= `${tour.duration} days`
+              td= tour.difficulty
+              td= `${tour.ratingsAverage} (${tour.ratingsQuantity} ratings)`
+              td.font-bold= `$${tour.price}`
+              td= tour.summary
+              td= new Date(tour.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+              td
+                each date in tour.startDates
+                  p= new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+              td= tour.maxGroupSize
+              td= tour.bookingsCount || 0
+              td.actions
+                .action-buttons
+                  a(href=`/tour/${tour.slug}`, class='btn btn--white btn--small') View
+                  a(href=`/update-tour/${tour._id}`, class='btn btn--green btn--small') Edit
+                  button.btn.btn--red.btn--delete-tour.btn--small(data-tour-id=tour._id) Delete

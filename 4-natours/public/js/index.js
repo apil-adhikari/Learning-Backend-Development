@@ -6,6 +6,7 @@ import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { submitReview, updateReview, deleteReview } from './review';
 import { addTour, updateTour, deleteTour } from './tour';
+import { deleteUser } from './user';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -21,6 +22,8 @@ const deleteBtn = document.querySelector('#delete-review');
 const addTourForm = document.querySelector('.form--add-tour');
 const updateTourForm = document.querySelector('.form--update-tour');
 const deleteTourButtons = document.querySelectorAll('.btn--delete-tour');
+
+const deleteUserButtons = document.querySelectorAll('.btn--delete-user');
 
 // DELEGATION
 
@@ -145,6 +148,18 @@ if (deleteTourButtons) {
       const tourId = e.target.dataset.tourId;
       if (tourId) {
         await deleteTour(tourId);
+      }
+    });
+  });
+}
+
+if (deleteUserButtons) {
+  deleteUserButtons.forEach((button) => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const userId = e.target.dataset.userId;
+      if (userId) {
+        await deleteUser(userId);
       }
     });
   });

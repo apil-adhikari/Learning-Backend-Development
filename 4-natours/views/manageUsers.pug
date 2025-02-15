@@ -1,0 +1,30 @@
+extends base
+
+block content
+  .manage-users-header(style='display: flex; align-items: center; justify-content: space-between; margin: 2rem;')
+    h1.heading-secondary Manage Users
+    a(href='/add-user', class='btn btn--green') Add User
+
+  .table-container
+    table.table
+      thead
+        tr
+          th Image
+          th Name
+          th Email
+          th Role
+          th Role
+          th Action
+
+      tbody
+        each user in users
+          tr
+            td
+              img(src=`/img/users/${user.photo}`, alt='User Photo', width='50', height='50', style='border-radius: 50%;')
+            td= user.name
+            td= user.email
+            td= user.role
+            td.actions
+              .action-buttons
+                a(href=`/update-user/${user._id}`, class='btn btn--green btn--small') Edit
+                button.btn.btn--red.btn--delete-user.btn--small(data-user-id=user._id) Delete

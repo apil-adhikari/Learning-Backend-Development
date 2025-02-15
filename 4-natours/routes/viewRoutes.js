@@ -81,6 +81,14 @@ router.get(
   viewsController.getUpdateTourPage,
 );
 
+// ---USER DATA ----
+router.get(
+  '/manage-users',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getManageUsers,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

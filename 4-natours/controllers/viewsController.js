@@ -239,3 +239,19 @@ exports.getUpdateTourPage = catchAsyncError(async (req, res, next) => {
     availiableGuides: availiableGuides || [],
   });
 });
+
+// MANAGE USERS PAGE RENDERING CONTROLLER
+exports.getManageUsers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find();
+
+  // Sort users by role: user, guide, lead-guide, admin
+  const sortedUsers = users.sort((a, b) => {
+    const roleOrder = ['user', 'guide', 'lead-guide', 'admin'];
+    return roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
+  });
+
+  res.status(200).render('manageUsers', {
+    title: 'Manage Users',
+    users: sortedUsers,
+  });
+});

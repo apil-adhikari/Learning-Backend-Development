@@ -111,6 +111,13 @@ router.get(
   viewsController.getManageReviews,
 );
 
+router.get(
+  '/update-review/:id',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getUpdateReviewPage,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

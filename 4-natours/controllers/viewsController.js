@@ -323,3 +323,18 @@ exports.getManageReviews = catchAsyncError(async (req, res, next) => {
     reviewsByTour,
   });
 });
+
+exports.getUpdateReviewPage = catchAsyncError(async (req, res, next) => {
+  const review = await Review.findById(req.params.id)
+    .populate('user', 'name photo')
+    .populate('tour', 'name imageCover');
+
+  if (!review) {
+    return next(new AppError('No review found with that ID', 404));
+  }
+
+  res.status(200).render('updateReview', {
+    title: 'Edit Review',
+    review,
+  });
+});

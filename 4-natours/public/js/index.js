@@ -7,6 +7,7 @@ import { bookTour } from './stripe';
 import { submitReview, updateReview, deleteReview } from './review';
 import { addTour, updateTour, deleteTour } from './tour';
 import { addUser, updateUser, deleteUser } from './user';
+import { updateReviewByAdmin, deleteReviewByAdmin } from './reviewByAdmin';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -26,7 +27,8 @@ const deleteTourButtons = document.querySelectorAll('.btn--delete-tour');
 const deleteUserButtons = document.querySelectorAll('.btn--delete-user');
 const addUserForm = document.querySelector('.form--add-user');
 const updateUserForm = document.querySelector('.form--update-user');
-
+const updateReviewForm = document.querySelector('.form--update-review');
+const deleteReviewButtons = document.querySelectorAll('.btn--delete-review');
 // DELEGATION
 
 // Login Form
@@ -187,5 +189,28 @@ if (updateUserForm) {
     const userId = updateUserForm.dataset.userId;
 
     await updateUser(userId, data);
+  });
+}
+
+if (updateReviewForm) {
+  updateReviewForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(updateReviewForm);
+    const data = Object.fromEntries(form.entries());
+    const reviewId = updateReviewForm.dataset.reviewId;
+
+    await updateReviewByAdmin(reviewId, data);
+  });
+}
+
+if (deleteReviewButtons) {
+  deleteReviewButtons.forEach((button) => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const reviewId = e.target.dataset.reviewId;
+      if (reviewId) {
+        await deleteReviewByAdmin(reviewId);
+      }
+    });
   });
 }

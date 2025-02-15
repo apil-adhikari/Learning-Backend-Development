@@ -1,0 +1,42 @@
+extends base
+
+block content
+  main.main
+    .manage-reviews-header(style='display: flex; align-items: center; justify-content: space-between; margin: 2rem;')
+      h1.heading-secondary Manage Reviews
+
+    .table-container
+      each tourGroup in reviewsByTour
+        .tour-group
+          if tourGroup.tour
+            .tour-header(style='display: flex; align-items: center; margin-bottom: 2rem;')
+              a(href=`/tour/${tourGroup.tour.slug}`, style='text-decoration: none; color: inherit; display: flex; align-items: center;')
+                img(src=`/img/tours/${tourGroup.tour.imageCover}`, alt='Tour Image', width='400', height='auto', style='border-radius: 10px; margin-right: 2rem;')
+                h2(style='font-size: 2.5rem;')= tourGroup.tour.name
+          else
+            h2(style='font-size: 2.5rem;') Tour not available
+
+          table.table(style='font-size: 1.2rem;')
+            thead
+              tr
+                th User
+                th Rating
+                th Review
+                th Actions
+            tbody
+              each review in tourGroup.reviews
+                tr
+                  td
+                    if review.user
+                      .user-info(style='display: flex; align-items: center;')
+                        img(src=`/img/users/${review.user.photo}`, alt='User Photo', width='50', height='50', style='border-radius: 50%; margin-right: 1rem;')
+                        h3(style='font-size: 1.5rem;')= review.user.name
+                    else
+                      span User not available
+                  td= review.rating
+                  td= review.review
+                  td.actions
+                    .action-buttons
+                      a(href=`/edit-review/${review._id}`, class='btn btn--green btn--small') Edit
+                      button.btn.btn--red.btn--delete-review.btn--small(data-review-id=review._id) Delete
+          hr(style='border: 2px solid #ccc; margin: 2rem 0;')

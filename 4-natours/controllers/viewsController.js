@@ -276,3 +276,50 @@ exports.getEditUserPage = catchAsyncError(async (req, res, next) => {
     userToEdit,
   });
 });
+
+// MANAGE REVIEWS PAGE RENDERING CONTROLLER
+exports.getManageReviews = catchAsyncError(async (req, res, next) => {
+  const reviewsByTour = await Review.aggregate([
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'user',
+        foreignField: '_id',
+        as: 'userDetails',
+      },
+    },
+    {
+      $unwind: '$userDetails',
+    },
+    {
+      $lookup: {
+        from: 'tours',
+        localField: 'tour',
+        foreignField: '_id',
+        as: 'tourDetails',
+      },
+    },
+    {
+      $unwind: '$tourDetails',
+    },
+    {
+      $group: {
+        _id: '$tour',
+        tour: { $first: '$tourDetails' },
+        reviews: {
+          $push: {
+            _id: '$_id',
+            rating: '$rating',
+            review: '$review',
+            user: '$userDetails',
+          },
+        },
+      },
+    },
+  ]);
+
+  res.status(200).render('manageReviews', {
+    title: 'Manage Reviews',
+    reviewsByTour,
+  });
+});

@@ -103,6 +103,14 @@ router.get(
   viewsController.getEditUserPage,
 );
 
+// ---REVIEWS ---
+router.get(
+  '/manage-reviews',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getManageReviews,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

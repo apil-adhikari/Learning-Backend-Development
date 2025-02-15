@@ -52,10 +52,10 @@ exports.signup = catchAsyncError(async (req, res, next) => {
   // Sanitize and only allow the required fields from the request body
   const { name, email, password, passwordConfirm, role } = req.body;
 
-  // // Only allow 'user' or 'guide' roles, default to 'user' if role is not specified or is invalid
-  // const sanitizedRole = ['user', 'guide', 'lead-guide', 'admin'].includes(role)
-  //   ? role
-  //   : 'user';
+  /// Only allow 'user', 'guide', 'lead-guide', or 'admin' roles, default to 'user' if role is not specified or is invalid
+  const sanitizedRole = ['user', 'guide', 'lead-guide', 'admin'].includes(role)
+    ? role
+    : 'user';
 
   // // Check if email already exists in the database (duplicate key error handling)
   // const existingUser = await User.findOne({ email });
@@ -73,6 +73,7 @@ exports.signup = catchAsyncError(async (req, res, next) => {
     name,
     email,
     password,
+    role: sanitizedRole,
     passwordConfirm,
     passwordChangedAt: undefined, // Don't allow the client to set this field
 

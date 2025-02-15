@@ -89,6 +89,20 @@ router.get(
   viewsController.getManageUsers,
 );
 
+router.get(
+  '/add-user',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getAddUserPage,
+);
+
+router.get(
+  '/update-user/:id',
+  authenticationController.protect,
+  authenticationController.restrictTo('admin'),
+  viewsController.getEditUserPage,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

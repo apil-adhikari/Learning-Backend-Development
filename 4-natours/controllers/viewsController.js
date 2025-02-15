@@ -255,3 +255,24 @@ exports.getManageUsers = catchAsyncError(async (req, res, next) => {
     users: sortedUsers,
   });
 });
+
+exports.getAddUserPage = (req, res) => {
+  res.status(200).render('addUser', {
+    title: 'Add User',
+    // adminEmail: req.user.email,
+    // adminPassword: req.user.password,
+  });
+};
+
+exports.getEditUserPage = catchAsyncError(async (req, res, next) => {
+  const userToEdit = await User.findById(req.params.id);
+
+  if (!userToEdit) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
+  res.status(200).render('editUser', {
+    title: 'Edit User',
+    userToEdit,
+  });
+});

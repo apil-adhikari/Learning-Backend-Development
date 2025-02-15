@@ -6,7 +6,7 @@ import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
 import { submitReview, updateReview, deleteReview } from './review';
 import { addTour, updateTour, deleteTour } from './tour';
-import { deleteUser } from './user';
+import { addUser, updateUser, deleteUser } from './user';
 
 // DOM ELEMENTS
 const loginForm = document.querySelector('.form--login');
@@ -24,6 +24,8 @@ const updateTourForm = document.querySelector('.form--update-tour');
 const deleteTourButtons = document.querySelectorAll('.btn--delete-tour');
 
 const deleteUserButtons = document.querySelectorAll('.btn--delete-user');
+const addUserForm = document.querySelector('.form--add-user');
+const updateUserForm = document.querySelector('.form--update-user');
 
 // DELEGATION
 
@@ -162,5 +164,28 @@ if (deleteUserButtons) {
         await deleteUser(userId);
       }
     });
+  });
+}
+
+// Add User
+if (addUserForm) {
+  addUserForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(addUserForm);
+    const data = Object.fromEntries(form.entries());
+
+    await addUser(data);
+  });
+}
+
+// Edit User
+if (updateUserForm) {
+  updateUserForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(updateUserForm);
+    const data = Object.fromEntries(form.entries());
+    const userId = updateUserForm.dataset.userId;
+
+    await updateUser(userId, data);
   });
 }

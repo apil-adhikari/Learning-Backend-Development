@@ -1,0 +1,34 @@
+extends base
+
+block content
+  main.main
+    .edit-user-form
+      h2.heading-secondary.ma-bt-lg Edit User
+      form.form.form--update-user(data-user-id=userToEdit._id)
+        .form__group
+          label.form__label(for='name') Name
+          input#name.form__input(
+            type='text',
+            name='name',
+            placeholder='John Doe',
+            required,
+            value=userToEdit.name
+          )
+        .form__group
+          label.form__label(for='email') Email
+          input#email.form__input(
+            type='email',
+            name='email',
+            placeholder='john@example.com',
+            required,
+            value=userToEdit.email
+          )
+        .form__group
+          label.form__label(for='role') Role
+          select#role.form__input(name='role', required)
+            option(value='user' selected=userToEdit.role==='user') User
+            option(value='guide' selected=userToEdit.role==='guide') Guide
+            option(value='lead-guide' selected=userToEdit.role==='lead-guide') Lead Guide
+            option(value='admin' selected=userToEdit.role==='admin') Admin
+        .form__group
+          button.btn.btn--green(type='submit') Save Changes

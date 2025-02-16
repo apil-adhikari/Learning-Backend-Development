@@ -4,6 +4,7 @@ const Booking = require('../models/bookingModel');
 const Review = require('../models/reviewModel');
 const AppError = require('../utils/appError');
 const catchAsyncError = require('../utils/catchAsyncError');
+const recommendationController = require('./recommendationController');
 
 exports.getOverview = catchAsyncError(async (req, res, next) => {
   // 1) Get all tour data from the collection
@@ -67,7 +68,10 @@ exports.getTour = catchAsyncError(async (req, res, next) => {
       return false; // Handle cases where review.user or review.user._id might be null/undefined
     });
 
-    console.log('User review in viewsController:getTour', userReview);
+    console.log(
+      'User review in viewsController:getTour userrevies is',
+      userReview,
+    );
 
     console.log(
       'Tour has been booked or not (true : booked | false : note booked):',
@@ -336,5 +340,52 @@ exports.getUpdateReviewPage = catchAsyncError(async (req, res, next) => {
   res.status(200).render('updateReview', {
     title: 'Edit Review',
     review,
+  });
+});
+
+// RECOMMENDATION PAGE RENDERING CONTROLLER
+// exports.getRecommendedTours = catchAsyncError(async (req, res, next) => {
+//   // Set the user ID in the request params
+//   req.params.id = req.user.id;
+
+//   // Use the recommendation controller to get recommended tours
+//   const recommendations = await recommendationController.getRecommendations(
+//     req,
+//     res,
+//     next,
+//   );
+
+//   // Render the view with the recommended tours
+//   res.status(200).render('recommendedTour', {
+//     title: 'Recommended Tours',
+//     tours: recommendations.data.recommendations,
+//     user: req.user,
+//   });
+// });
+
+exports.getRecommendedTours = catchAsyncError(async (req, res, next) => {
+  // Set the user ID in the request params
+  req.params.id = req.user.id;
+
+  // Temporarily store the original res.json function
+  const originalJson = res.json;
+
+  // Override res.json to capture the recommendations data
+  let recommendationsData;
+  res.json = (data) => {
+    recommendationsData = data;
+  };
+
+  // Call the recommendation controller to get recommended tours
+  await recommendationController.getRecommendations(req, res, next);
+
+  // Restore the original res.json function
+  res.json = originalJson;
+
+  // Render the view with the recommended tours
+  res.status(200).render('recommendedTour', {
+    title: 'Recommended Tours',
+    tours: recommendationsData.data.recommendations,
+    user: req.user,
   });
 });

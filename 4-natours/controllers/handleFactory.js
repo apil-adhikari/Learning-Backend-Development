@@ -43,7 +43,6 @@ exports.updateOne = (Model) =>
 
 exports.createOne = (Model) =>
   catchAsyncError(async (req, res, next) => {
-    console.log('IN CREATE TOUR\n', req.body);
     const newDocument = await Model.create(req.body);
     console.log(newDocument);
 
@@ -57,6 +56,8 @@ exports.createOne = (Model) =>
 
 exports.getOne = (Model, populateOptions) =>
   catchAsyncError(async (req, res, next) => {
+    console.log('IN CREATE TOUR\n', req.user);
+
     // const document = await Model.findById(req.params.id).populate('reviews');
     // Insted of directly chaining the populate, we first create a query and later check if there is populateOptions if it is there we chatin it to query and later we do await.
 
@@ -88,6 +89,7 @@ exports.getOne = (Model, populateOptions) =>
 
 exports.getAll = (Model) =>
   catchAsyncError(async (req, res, next) => {
+    console.log('In handleFactory.getAll() *****************************');
     // To allow for nested GET reviews on tour (samll hack)
     let filter = {};
     if (req.params.tourId) filter = { tour: req.params.tourId };

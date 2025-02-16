@@ -16,6 +16,7 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const recommendationRouter = require('./routes/recommendationRoutes');
 
 // Creating an instance of the express function by initilizing express to app variable
 const app = express();
@@ -177,6 +178,7 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/recommendations', recommendationRouter);
 
 /** Handling UNHANDLED ROUTE
  * PROBLEM: How to implement route handler for a route that was not catched by any other rotue handler in our app?

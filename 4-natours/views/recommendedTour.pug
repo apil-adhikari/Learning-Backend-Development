@@ -1,0 +1,38 @@
+extends base
+
+block append head
+  script(src='https://js.stripe.com/v2/')
+block content
+  table.table(style='border: 5px solid #55c57a;')
+    thead
+      tr 
+        th(colspan="6")
+          h1(style='background-color: #55c57a; color: white; padding: 1rem;') 
+            span Recommended Tours
+      tr 
+      tr
+        th Image
+        th Name
+        th Duration
+        th Difficulty
+        th Price
+        th Price
+        th Book
+    tbody
+      each tour in tours
+        tr
+          td
+            img.header__hero-img(src=`/img/tours/${tour.imageCover}`, alt=tour.name)
+          td
+            a(href=`/tour/${tour.slug}`)= tour.name
+          td
+            span= `${tour.duration} days`
+          td
+            span= tour.difficulty.charAt(0).toUpperCase() + tour.difficulty.slice(1)
+          td
+            span= `$${tour.price}`
+          td
+            if user
+              button.btn.btn--green#book-tour(data-tour-id=tour._id) Book Now
+            else
+              a.btn.btn--green(href='/login') Log in to book tour

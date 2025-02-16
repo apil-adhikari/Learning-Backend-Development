@@ -118,6 +118,13 @@ router.get(
   viewsController.getUpdateReviewPage,
 );
 
+// Recommendation route
+router.get(
+  '/recommended-tours',
+  authenticationController.protect,
+  viewsController.getRecommendedTours,
+);
+
 // END OF ADMIN ACCESS ROUTES
 
 module.exports = router;

@@ -23,7 +23,7 @@ const upload = multer({
 
 exports.uploadTourImages = upload.fields([
   { name: 'imageCover', maxCount: 1 },
-  { name: 'images', maxCount: 3 },
+  { name: 'images', maxCount: 6 },
 ]);
 
 exports.resizeTourImages = catchAsyncError(async (req, res, next) => {

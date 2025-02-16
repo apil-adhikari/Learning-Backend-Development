@@ -9,7 +9,7 @@ const map = new mapboxgl.Map({
   style: 'mapbox://styles/apiladhikari1/cm76hirt600kf01qv6gbi5bih',
   center: [85.324, 27.7172],
   scrollZoom: false,
-  zoom: 12,
+  zoom: 10,
 });
 
 const bounds = new mapboxgl.LngLatBounds();
